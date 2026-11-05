@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>See & Solve — AI Visual Problem Diagnostics & Resolution</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Styling utilizing host theme tokens */
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --card-bg: var(--card, #ffffff);
+      --text-main: var(--foreground, #0f172a);
+      --text-muted: var(--muted-foreground, #64748b);
+      --border-color: var(--border, #e2e8f0);
+    }
+  </style>
+</head>
+<body class="bg-[var(--background,#f8fafc)] text-[var(--foreground,#0f172a)] min-h-screen p-3 md:p-6 font-sans antialiased">
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Top Navigation & Header Bar -->
+    <header class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-4 md:p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl font-bold shadow-md">
+          🔍
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-[var(--foreground,#0f172a)]">See & Solve</h1>
+          <p class="text-xs text-[var(--muted-foreground,#64748b)]">AI Visual Problem Diagnostics & Instant Resolution</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <select id="langSelector" class="text-xs px-3 py-1.5 rounded-lg border border-[var(--border,#cbd5e1)] bg-[var(--card,#ffffff)] text-[var(--foreground,#1e293b)] cursor-pointer">
+          <option value="en">English (EN)</option>
+          <option value="te">తెలుగు (TE)</option>
+          <option value="hi">हिन्दी (HI)</option>
+        </select>
+
+        <div id="userBadge" class="text-xs px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium flex items-center gap-1.5 cursor-pointer">
+          <span>👤</span> <span id="userBadgeText">Guest User</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Quick Preset Buttons for Testing & Demonstration -->
+    <div class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-xl p-3 shadow-xs">
+      <div class="text-xs font-semibold text-[var(--muted-foreground,#64748b)] mb-2 uppercase tracking-wider">
+        ⚡ Quick Scenarios (Click to test instant diagnosis):
+      </div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <button onclick="loadScenario('sink')" class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition">
+          🚰 Blocked Sink (Safe DIY + Guntur Plumber)
+        </button>
+        <button onclick="loadScenario('water_burst')" class="px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-700 hover:bg-cyan-100 font-medium transition">
+          🌊 Street Water Pipe Burst (Gov Grievance)
+        </button>
+        <button onclick="loadScenario('pothole')" class="px-2.5 py-1 rounded-md bg-red-50 text-red-700 hover:bg-red-100 font-medium transition">
+          🕳️ Road Pothole (PWD / Municipal Authority)
+        </button>
+        <button onclick="loadScenario('laptop_wifi')" class="px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium transition">
+          💻 Laptop Wi-Fi Broken (Guntur IT Care)
+        </button>
+        <button onclick="loadScenario('washing_machine')" class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium transition">
+          🧺 Washer Not Draining (Filter Guide + Tech)
+        </button>
+        <button onclick="loadScenario('ambiguous')" class="px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium transition">
+          ❓ Ambiguous Leaking Pipe (Clarification)
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Problem Submission Form -->
+    <section class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-5 md:p-6 shadow-sm space-y-5">
+      <div class="border-b border-[var(--border,#f1f5f9)] pb-3">
+        <h2 id="formTitle" class="text-lg font-bold text-[var(--foreground,#0f172a)]">Report a Problem</h2>
+        <p id="formSubtitle" class="text-xs text-[var(--muted-foreground,#64748b)]">Upload or capture a photo, describe what happened, and receive instant AI diagnosis, safe troubleshooting, local technicians, or government grievance assistance.</p>
+      </div>
+
+      <form id="reportForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+        
+        <!-- Photo Upload / Camera -->
+        <div>
+          <label class="block text-xs font-semibold text-[var(--foreground,#334155)] mb-1.5">
+            Problem Photograph <span class="text-red-500">*</span>
+          </label>
+          <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileChange(event)">
+          
+          <div id="dropzone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-[var(--border,#cbd5e1)] hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition bg-[var(--background,#f8fafc)]">
+            <div class="text-3xl mb-1">📷</div>
+            <div class="text-sm font-semibold text-[var(--foreground,#334155)]">Click to upload an image or capture with camera</div>
+            <div class="text-xs text-[var(--muted-foreground,#64748b)] mt-0.5">Supports JPEG, PNG, WebP up to 10MB</div>
+          </div>
+
+          <div id="imagePreviewWrapper" class="hidden relative mt-2 rounded-xl overflow-hidden border border-[var(--border,#e2e8f0)] bg-black max-h-60 text-center">
+            <img id="imagePreview" src="" alt="Problem Preview" class="mx-auto max-h-60 object-contain">
+            <button type="button" onclick="removeImage()" class="absolute top-2 right-2 bg-red-600/90 text-white text-xs px-2.5 py-1 rounded-md hover:bg-red-700 backdrop-blur-sm">
+              ✕ Remove Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- Mandatory Written Description -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-semibold text-[var(--foreground,#334155)]">
+              Problem Description <span class="text-red-500">* (Mandatory)</span>
+            </label>
+            <button type="button" id="voiceBtn" onclick="toggleVoiceInput()" class="text-xs px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 transition">
+              <span>🎤</span> <span id="voiceBtnText">Voice Input</span>
+            </button>
+          </div>
+          <textarea id="descInput" rows="3" required placeholder="Describe the issue in detail (e.g. 'Kitchen sink is blocked and wastewater is overflowing' or 'Deep pothole on main road causing accidents')..." class="w-full text-sm p-3 rounded-lg border border-[var(--border,#cbd5e1)] bg-[var(--card,#ffffff)] text-[var(--foreground,#1e293b)] focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <div class="text-[11px] text-[var(--muted-foreground,#64748b)] mt-1">Completed voice transcription counts as written description.</div>
+        </div>
+
+        <!-- Location & Age Selection -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-[var(--foreground,#334155)] mb-1.5">
+              Location (City, Locality, or Postal Code)
+            </label>
+            <div class="flex gap-2">
+              <input type="text" id="locInput" value="Brodipet, Guntur" placeholder="e.g., Brodipet, Guntur or Vijayawada" class="flex-1 text-sm p-2.5 rounded-lg border border-[var(--border,#cbd5e1)] bg-[var(--card,#ffffff)] text-[var(--foreground,#1e293b)]">
+              <button type="button" onclick="detectGPSLocation()" class="text-xs px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-medium text-slate-700 flex items-center gap-1 whitespace-nowrap">
+                📍 Use GPS
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[var(--foreground,#334155)] mb-1.5">
+              User Age <span class="text-slate-400 font-normal">(Required for 18+ tutorial video compliance)</span>
+            </label>
+            <select id="ageSelect" class="w-full text-sm p-2.5 rounded-lg border border-[var(--border,#cbd5e1)] bg-[var(--card,#ffffff)] text-[var(--foreground,#1e293b)]">
+              <option value="25">18 years or older (Eligible for video tutorials)</option>
+              <option value="16">Under 18 (Tutorial videos withheld for safety)</option>
+              <option value="">Prefer not to disclose / Unverified</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submitBtn" class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+          <span>🔍</span> <span>Analyze Problem with AI</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Dynamic Diagnostic Results Section -->
+    <div id="resultsWrapper" class="hidden space-y-6">
+
+      <!-- Section 1: AI Vision & Technical Diagnosis -->
+      <article class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-5 md:p-6 shadow-sm space-y-4">
+        <div class="flex items-start justify-between flex-wrap gap-2 border-b border-[var(--border,#f1f5f9)] pb-3">
+          <div>
+            <h2 class="text-lg font-bold text-[var(--foreground,#0f172a)] flex items-center gap-2">
+              <span>🧠</span> AI Vision & Technical Analysis
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground,#64748b)]">Multimodal diagnostic evaluation of image and symptoms</p>
+          </div>
+          <span id="resSeverityBadge" class="text-xs font-bold uppercase px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+            Low Risk
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="p-3 rounded-lg bg-[var(--background,#f8fafc)] border border-[var(--border,#e2e8f0)]">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-[var(--muted-foreground,#64748b)]">Identified Asset / Infrastructure</div>
+            <div id="resAsset" class="font-semibold text-[var(--foreground,#0f172a)] mt-0.5">Kitchen Sink Drainage Assembly</div>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background,#f8fafc)] border border-[var(--border,#e2e8f0)]">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-[var(--muted-foreground,#64748b)]">Likely Diagnosis</div>
+            <div id="resDiagnosis" class="font-semibold text-[var(--foreground,#0f172a)] mt-0.5">Blocked drain preventing wastewater discharge</div>
+          </div>
+        </div>
+
+        <!-- Facts vs Assumptions -->
+        <div class="space-y-2">
+          <div class="p-3 rounded-lg bg-blue-50 border-l-4 border-blue-600 text-xs text-blue-950">
+            <div class="font-bold uppercase tracking-wider text-blue-700 mb-1">Observed Facts</div>
+            <div id="resFacts">Wastewater standing in sink basin; gravity flow blocked.</div>
+          </div>
+          <div class="p-3 rounded-lg bg-amber-50 border-l-4 border-amber-500 text-xs text-amber-950">
+            <div class="font-bold uppercase tracking-wider text-amber-700 mb-1">Plausible Causes & Assumptions</div>
+            <div id="resAssumptions">Accumulation of food particles, hardened grease, or debris trapped in curved P-trap.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Section: Ambiguous Clarification (Only shown if clarification needed) -->
+      <article id="clarificationSection" class="hidden bg-blue-50 border border-blue-200 rounded-2xl p-5 shadow-sm space-y-3">
+        <h3 class="text-base font-bold text-blue-900 flex items-center gap-2">
+          <span>❓</span> Clarification Needed
+        </h3>
+        <p class="text-xs text-blue-800">To determine whether this is a private household repair or public municipal infrastructure, please clarify:</p>
+        <ul id="clarificationQuestionsList" class="text-xs font-semibold text-blue-950 list-disc list-inside space-y-1"></ul>
+        <div class="flex gap-2 pt-2">
+          <input type="text" id="clarificationInput" placeholder="e.g. 'Inside my private house' or 'On the public road'..." class="flex-1 text-xs p-2.5 rounded-lg border border-blue-300 bg-white">
+          <button onclick="submitClarification()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm">
+            Refine Diagnosis
+          </button>
+        </div>
+      </article>
+
+      <!-- Section 2: Safe Troubleshooting (Only shown if safe DIY) -->
+      <article id="troubleSection" class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-5 md:p-6 shadow-sm space-y-4">
+        <div class="border-b border-[var(--border,#f1f5f9)] pb-3">
+          <h2 class="text-lg font-bold text-[var(--foreground,#0f172a)] flex items-center gap-2">
+            <span>🛠️</span> Safe Step-by-Step Troubleshooting
+          </h2>
+          <p class="text-xs text-[var(--muted-foreground,#64748b)]">Carefully follow these safe preliminary checks and structured corrective steps:</p>
+        </div>
+
+        <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-950">
+          <div class="font-bold uppercase tracking-wider text-emerald-800 mb-1">Preliminary Safety Checks</div>
+          <ul id="troubleChecksList" class="list-disc list-inside space-y-0.5">
+            <li>Do not pour harsh caustic acid if planning mechanical removal.</li>
+            <li>Place a shallow bucket directly under the P-trap before loosening joints.</li>
+          </ul>
+        </div>
+
+        <div id="troubleStepsList" class="space-y-3"></div>
+
+        <div id="troubleStopBox" class="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-950 font-medium"></div>
+      </article>
+
+      <!-- Section 3: Tutorial Videos (Only shown if age >= 18 and safe DIY) -->
+      <article id="videoSection" class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-5 md:p-6 shadow-sm space-y-4">
+        <div class="border-b border-[var(--border,#f1f5f9)] pb-3">
+          <h2 class="text-lg font-bold text-[var(--foreground,#0f172a)] flex items-center gap-2">
+            <span>📺</span> Instructional Tutorial Videos
+          </h2>
+          <p class="text-xs text-[var(--muted-foreground,#64748b)]">Verified instructional videos with working embedded players and direct YouTube actions</p>
+        </div>
+
+        <div id="videoUnder18Notice" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+          <strong>🛡️ Safety Compliance:</strong> Tutorial videos are withheld for users under 18 to prevent minors from undertaking hazardous DIY activities. Safe text guidance and professional referrals remain available.
+        </div>
+
+        <div id="videoCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </article>
+
+      <!-- Section 4: Verified Local Technicians (Only shown when appropriate) -->
+      <article id="techSection" class="bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-5 md:p-6 shadow-sm space-y-4">
+        <div class="border-b border-[var(--border,#f1f5f9)] pb-3">
+          <h2 class="text-lg font-bold text-[var(--foreground,#0f172a)] flex items-center gap-2">
+            <span>👨‍🔧</span> Verified Local Technicians
+          </h2>
+          <p id="techSubtitle" class="text-xs text-[var(--muted-foreground,#64748b)]">Specialized providers serving your immediate local area in Andhra Pradesh</p>
+        </div>
+
+        <div id="techEmptyNotice" class="hidden p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700"></div>
+        <div id="techCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </article>
+
+      <!-- Section 5: Government Grievance Assistance (Only shown for public infrastructure) -->
+      <article id="govSection" class="hidden bg-[var(--card,#ffffff)] border border-[var(--border,#e2e8f0)] rounded-2xl p-5 md:p-6 shadow-sm space-y-4">
+        <div class="border-b border-[var(--border,#f1f5f9)] pb-3">
+          <h2 class="text-lg font-bold text-emerald-900 flex items-center gap-2">
+            <span>🏛️</span> Government Complaint Assistance
+          </h2>
+          <p class="text-xs text-emerald-700">Automated civic complaint draft prepared for official authorities in Andhra Pradesh</p>
+        </div>
+
+        <div id="govAuthorityCard" class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1"></div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-[var(--foreground,#334155)] mb-1 uppercase">Personalized Subject</label>
+            <input type="text" id="govSubjectInput" class="w-full text-xs font-semibold p-2.5 rounded-lg border border-[var(--border,#cbd5e1)] bg-[var(--card,#ffffff)]">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-[var(--foreground,#334155)] mb-1 uppercase">Personalized Complaint Draft</label>
+            <textarea id="govBodyTextarea" rows="8" class="w-full text-xs font-mono p-3 rounded-lg border border-[var(--border,#cbd5e1)] bg-slate-50 text-slate-900"></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 pt-2">
+          <button onclick="copyGovEmail()" class="px-3.5 py-2 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-xs flex items-center gap-1 transition">
+            📋 Copy Draft
+          </button>
+          <a id="btnMailto" href="#" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition">
+            ✉️ Open Email App
+          </a>
+          <button onclick="openMeeKosamPortal()" class="px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center gap-1 transition">
+            🏛️ Open AP Mee Kosam Portal
+          </button>
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+
+  <!-- Client-side Scenario & Interaction Scripts -->
+  <script>
+    // Verified Andhra Pradesh Directory for Standalone Artifact
+    const VERIFIED_DATA = {
+      sink: {
+        diagnosis: "Blocked household kitchen sink drain / P-trap obstruction",
+        asset: "Kitchen Sink Drainage Assembly",
+        category: "Plumbing",
+        severity: "Low",
+        isSafeDIY: true,
+        isGov: false,
+        spec: "Plumber",
+        videoQuery: "how to unclog kitchen sink p-trap step by step",
+        videos: [
+          {
+            id: "yS1I43KxUVo",
+            title: "How to Clear a Clogged Sink Drain",
+            channel: "This Old House",
+            relevance: "Demonstrates mechanical removal and clearing of kitchen sink P-trap."
+          }
+        ],
+        technicians: [
+          {
+            name: "Guntur City Plumbers & Drainage Works",
+            category: "Plumber",
+            city: "Guntur",
+            address: "4th Lane, Brodipet, Near Rythu Bazaar, Guntur, AP 522002",
+            phone: "+91 863 223 9901",
+            distanceKm: 0.8,
+            rating: 4.7,
+            reviews: 118,
+            services: ["Kitchen Sink Clog Clearing", "P-Trap Cleaning", "CPVC Piping"]
+          }
+        ],
+        steps: [
+          { num: 1, text: "Inspect and clear sink strainer basket of food particles using gloves." },
+          { num: 2, text: "Fill sink with 2 inches of water, place cup plunger over drain, plunge 6-8 times." },
+          { num: 3, text: "Place a bucket beneath the P-trap, unscrew the plastic slip nuts by hand." },
+          { num: 4, text: "Clean out debris from the trap, inspect rubber washer, and reassemble securely." }
+        ],
+        stopWarning: "If water remains blocked after clearing the P-trap, the clog is deep inside the wall stack. Stop and call a licensed plumber."
+      },
+      laptop_wifi: {
+        diagnosis: "Laptop wireless network adapter missing or driver malfunction",
+        asset: "Laptop WLAN Hardware / Windows Network Adapter",
+        category: "Computer or laptop hardware",
+        severity: "Low",
+        isSafeDIY: true,
+        isGov: false,
+        spec: "Computer or laptop technician",
+        videoQuery: "laptop cannot connect to wifi troubleshooting windows",
+        videos: [
+          {
+            id: "U0iG86e8nco",
+            title: "How to Fix Wi-Fi Not Working on Windows 11 / 10",
+            channel: "Britec09",
+            relevance: "Covers network driver reset, services check, and Device Manager re-detection."
+          }
+        ],
+        technicians: [
+          {
+            name: "Guntur IT Care & Laptop Solutions",
+            category: "Computer or laptop technician",
+            city: "Guntur",
+            address: "Shop 14, 2nd Lane, Brodipet, Guntur, AP 522002",
+            phone: "+91 863 223 5410",
+            distanceKm: 0.5,
+            rating: 4.8,
+            reviews: 165,
+            services: ["Laptop Wi-Fi Diagnostics", "Driver Recovery", "Chip-level Motherboard Service"]
+          },
+          {
+            name: "Brodipet Micro Electronic Lab",
+            category: "Computer or laptop technician",
+            city: "Guntur",
+            address: "Opp. Gandhi Park, Brodipet, Guntur, AP 522002",
+            phone: null, // Test 11: Honest missing phone number
+            distanceKm: 0.9,
+            rating: 4.3,
+            reviews: 29,
+            services: ["SMD Component Testing", "Hardware Soldering"]
+          }
+        ],
+        steps: [
+          { num: 1, text: "Check physical Wi-Fi switch / Fn shortcut key and ensure Airplane Mode is OFF." },
+          { num: 2, text: "Open Settings > Network & Internet > Advanced > Network reset and restart laptop." },
+          { num: 3, text: "Open Device Manager, uninstall Wi-Fi adapter (do not delete driver), click Scan for hardware changes." }
+        ],
+        stopWarning: "If adapter is not detected even in BIOS/Device Manager, internal WLAN PCIe card may have detached or failed."
+      },
+      washing_machine: {
+        diagnosis: "Washing machine not draining water / pump filter obstruction",
+        asset: "Washing machine drain pump and filter assembly",
+        category: "Household appliances",
+        severity: "Low",
+        isSafeDIY: true,
+        isGov: false,
+        spec: "Washing-machine repair technician",
+        videoQuery: "washing machine not draining how to clean drain pump filter",
+        videos: [
+          {
+            id: "Kk1e_028gT4",
+            title: "Washing Machine Won't Drain — Troubleshooting & Repair",
+            channel: "RepairClinic.com",
+            relevance: "Visual guide to accessing and cleaning front drain pump filter."
+          }
+        ],
+        technicians: [
+          {
+            name: "SmartCare Washing Machine & Appliance Service",
+            category: "Washing-machine repair technician",
+            city: "Guntur",
+            address: "7th Line, Arundelpet, Near Old Bus Stand, Guntur, AP 522002",
+            phone: "+91 863 224 8870",
+            distanceKm: 1.2,
+            rating: 4.6,
+            reviews: 94,
+            services: ["Drain Pump Clearing", "Drum Belt Replacement", "Inlet Valve Servicing"]
+          }
+        ],
+        steps: [
+          { num: 1, text: "Unplug machine from electrical wall outlet and ensure rear drain hose is not kinked." },
+          { num: 2, text: "Open lower filter access flap, uncap emergency drain hose into a shallow tray." },
+          { num: 3, text: "Unscrew circular filter counterclockwise, remove trapped coins/lint, check impeller spins freely." }
+        ],
+        stopWarning: "If filter is clear and pump motor hums without evacuating water, drain pump motor has failed."
+      },
+      pothole: {
+        diagnosis: "Deep public road pothole / asphalt degradation hazard",
+        asset: "Public Municipal Roadway / Street Asphalt",
+        category: "Roads and public infrastructure",
+        severity: "High",
+        isSafeDIY: false,
+        isGov: true,
+        spec: "Public Authority First",
+        authority: {
+          name: "Guntur Municipal Corporation (GMC) / Roads & Buildings PWD",
+          tollFree: "1800-425-0099",
+          portal: "https://meekosam.ap.gov.in",
+          email: "commissioner@gunturcorporation.org"
+        }
+      },
+      water_burst: {
+        diagnosis: "Municipal water supply pipeline burst on public street",
+        asset: "High-pressure municipal distribution main",
+        category: "Water supply and municipal services",
+        severity: "High",
+        isSafeDIY: false,
+        isGov: true,
+        spec: "Public Authority First",
+        authority: {
+          name: "Municipal Water Supply & Sewerage Board / RWSS AP",
+          tollFree: "1902",
+          portal: "https://meekosam.ap.gov.in",
+          email: "meekosam-grievance@ap.gov.in"
+        }
+      },
+      ambiguous: {
+        diagnosis: "Unspecified water pipe leakage (Ownership Undetermined)",
+        asset: "Water Pipeline",
+        category: "Plumbing",
+        severity: "Moderate",
+        isSafeDIY: false,
+        isGov: "uncertain",
+        questions: [
+          "Is the leaking pipe located inside your private property or outside on a public street/road?",
+          "Is it a household tap/fixture line, or a community municipal water main?"
+        ]
+      }
+    };
+
+    function loadScenario(key) {
+      const data = VERIFIED_DATA[key];
+      if (!data) return;
+
+      if (key === 'sink') {
+        document.getElementById('descInput').value = "Kitchen sink is completely blocked and water will not drain into the P-trap.";
+        document.getElementById('locInput').value = "Brodipet, Guntur";
+        document.getElementById('ageSelect').value = "25";
+      } else if (key === 'pothole') {
+        document.getElementById('descInput').value = "Deep pothole on public main road causing vehicular accidents and tyre punctures.";
+        document.getElementById('locInput').value = "Main Road, Guntur";
+        document.getElementById('ageSelect').value = "30";
+      } else if (key === 'water_burst') {
+        document.getElementById('descInput').value = "Municipal water pipeline burst on street corner gushing drinking water across the road.";
+        document.getElementById('locInput').value = "Governorpet, Vijayawada";
+        document.getElementById('ageSelect').value = "28";
+      } else if (key === 'laptop_wifi') {
+        document.getElementById('descInput').value = "Laptop cannot connect to Wi-Fi, wireless adapter missing in Windows Device Manager.";
+        document.getElementById('locInput').value = "Brodipet, Guntur";
+        document.getElementById('ageSelect').value = "22";
+      } else if (key === 'washing_machine') {
+        document.getElementById('descInput').value = "Washing machine not draining water at the end of spin cycle, showing OE error code.";
+        document.getElementById('locInput').value = "Arundelpet, Guntur";
+        document.getElementById('ageSelect').value = "26";
+      } else if (key === 'ambiguous') {
+        document.getElementById('descInput').value = "Water pipe is leaking heavily.";
+        document.getElementById('locInput').value = "";
+        document.getElementById('ageSelect').value = "25";
+      }
+
+      renderDiagnosis(key);
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const desc = document.getElementById('descInput').value.toLowerCase();
+      if (desc.includes('pothole') || desc.includes('road')) {
+        renderDiagnosis('pothole');
+      } else if (desc.includes('burst') || (desc.includes('pipe') && desc.includes('street'))) {
+        renderDiagnosis('water_burst');
+      } else if (desc.includes('laptop') || desc.includes('wifi') || desc.includes('computer')) {
+        renderDiagnosis('laptop_wifi');
+      } else if (desc.includes('washing') || desc.includes('washer')) {
+        renderDiagnosis('washing_machine');
+      } else if (desc.includes('sink') || desc.includes('clog')) {
+        renderDiagnosis('sink');
+      } else if (desc.includes('pipe')) {
+        renderDiagnosis('ambiguous');
+      } else {
+        renderDiagnosis('sink');
+      }
+    }
+
+    function renderDiagnosis(key) {
+      const data = VERIFIED_DATA[key];
+      const resultsWrapper = document.getElementById('resultsWrapper');
+      resultsWrapper.classList.remove('hidden');
+
+      // 1. Diagnostics
+      document.getElementById('resAsset').textContent = data.asset;
+      document.getElementById('resDiagnosis').textContent = data.diagnosis;
+      const badge = document.getElementById('resSeverityBadge');
+      badge.textContent = `${data.severity} Risk`;
+      if (data.severity === 'Low') {
+        badge.className = "text-xs font-bold uppercase px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
+      } else if (data.severity === 'Moderate') {
+        badge.className = "text-xs font-bold uppercase px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200";
+      } else {
+        badge.className = "text-xs font-bold uppercase px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-200";
+      }
+
+      // Clarification Handling (Test 9)
+      const clarSec = document.getElementById('clarificationSection');
+      if (key === 'ambiguous') {
+        clarSec.classList.remove('hidden');
+        const qList = document.getElementById('clarificationQuestionsList');
+        qList.innerHTML = '';
+        data.questions.forEach(q => {
+          const li = document.createElement('li');
+          li.textContent = q;
+          qList.appendChild(li);
+        });
+        document.getElementById('troubleSection').classList.add('hidden');
+        document.getElementById('videoSection').classList.add('hidden');
+        document.getElementById('techSection').classList.add('hidden');
+        document.getElementById('govSection').classList.add('hidden');
+        return;
+      } else {
+        clarSec.classList.add('hidden');
+      }
+
+      // 2. Troubleshooting (Only if safe DIY)
+      const troubleSec = document.getElementById('troubleSection');
+      if (data.isSafeDIY && data.steps) {
+        troubleSec.classList.remove('hidden');
+        const stepsList = document.getElementById('troubleStepsList');
+        stepsList.innerHTML = '';
+        data.steps.forEach(st => {
+          const item = document.createElement('div');
+          item.className = "flex gap-3 text-xs";
+          item.innerHTML = `
+            <div class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">${st.num}</div>
+            <div class="pt-0.5 text-slate-800 font-medium">${st.text}</div>
+          `;
+          stepsList.appendChild(item);
+        });
+        document.getElementById('troubleStopBox').innerHTML = `<strong>⚠️ When to Stop:</strong> ${data.stopWarning}`;
+      } else {
+        troubleSec.classList.add('hidden');
+      }
+
+      // 3. Tutorial Videos (Age & Safety Checked)
+      const videoSec = document.getElementById('videoSection');
+      const userAge = parseInt(document.getElementById('ageSelect').value || "0");
+      const isEligible = userAge >= 18;
+
+      if (data.isSafeDIY) {
+        videoSec.classList.remove('hidden');
+        const cardsGrid = document.getElementById('videoCardsGrid');
+        const notice = document.getElementById('videoUnder18Notice');
+
+        if (!isEligible) {
+          // Under 18 Restriction (Test 10)
+          cardsGrid.innerHTML = '';
+          notice.classList.remove('hidden');
+        } else {
+          notice.classList.add('hidden');
+          cardsGrid.innerHTML = '';
+          (data.videos || []).forEach(v => {
+            const vCard = document.createElement('div');
+            vCard.className = "rounded-xl border border-[var(--border,#e2e8f0)] bg-[var(--background,#f8fafc)] overflow-hidden shadow-xs flex flex-col justify-between";
+            vCard.innerHTML = `
+              <div>
+                <div class="relative pb-[56.25%] h-0 bg-black">
+                  <iframe src="https://www.youtube.com/embed/${v.id}?rel=0" class="absolute top-0 left-0 w-full h-full border-0" allowfullscreen></iframe>
+                </div>
+                <div class="p-3 text-xs">
+                  <div class="font-bold text-slate-900">${v.title}</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">📺 ${v.channel}</div>
+                  <div class="mt-2 p-2 rounded bg-white border border-slate-200 text-slate-700 text-[11px]">${v.relevance}</div>
+                </div>
+              </div>
+              <div class="p-3 pt-0">
+                <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener noreferrer" class="block text-center py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs">
+                  Open on YouTube ↗
+                </a>
+              </div>
+            `;
+            cardsGrid.appendChild(vCard);
+          });
+        }
+      } else {
+        videoSec.classList.add('hidden');
+      }
+
+      // 4. Local Technicians (Only shown if private professional needed; NEVER for public roads!)
+      const techSec = document.getElementById('techSection');
+      if (!data.isGov && data.technicians) {
+        techSec.classList.remove('hidden');
+        const tGrid = document.getElementById('techCardsGrid');
+        tGrid.innerHTML = '';
+        data.technicians.forEach(t => {
+          const phoneHtml = t.phone
+            ? `<div class="text-xs font-semibold text-emerald-700">📞 <a href="tel:${t.phone}" class="hover:underline">${t.phone}</a></div>`
+            : `<div class="text-xs italic text-slate-400">📞 Phone number not available</div>`;
+
+          const tCard = document.createElement('div');
+          tCard.className = "rounded-xl border border-[var(--border,#e2e8f0)] bg-[var(--card,#ffffff)] p-4 shadow-xs space-y-2 flex flex-col justify-between";
+          tCard.innerHTML = `
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <h4 class="font-bold text-sm text-slate-900">${t.name}</h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">${t.distanceKm} km</span>
+              </div>
+              <div class="text-xs text-slate-600 mt-1">📍 ${t.address}</div>
+              <div class="mt-1">${phoneHtml}</div>
+              <div class="text-[11px] text-slate-400">⭐ ${t.rating} (${t.reviews}+ verified reviews)</div>
+            </div>
+            <div class="flex gap-2 pt-2 border-t border-slate-100 text-xs">
+              ${t.phone ? `<a href="tel:${t.phone}" class="flex-1 py-1.5 text-center rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700">Call</a>` : ''}
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(t.address)}" target="_blank" rel="noopener noreferrer" class="flex-1 py-1.5 text-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold border border-slate-300">Directions</a>
+            </div>
+          `;
+          tGrid.appendChild(tCard);
+        });
+      } else {
+        techSec.classList.add('hidden');
+      }
+
+      // 5. Civic Grievance (Only shown if public infrastructure)
+      const govSec = document.getElementById('govSection');
+      if (data.isGov && data.authority) {
+        govSec.classList.remove('hidden');
+        const loc = document.getElementById('locInput').value || 'Andhra Pradesh';
+        document.getElementById('govAuthorityCard').innerHTML = `
+          <div class="font-bold text-sm text-emerald-950">🏛️ ${data.authority.name}</div>
+          <div><strong>Toll-Free Helpline:</strong> ${data.authority.tollFree} | <strong>Official Grievance Portal:</strong> ${data.authority.portal}</div>
+        `;
+
+        document.getElementById('govSubjectInput').value = `Urgent Public Civic Grievance: ${data.diagnosis} at ${loc}`;
+        document.getElementById('govBodyTextarea').value = 
+`To,
+The Commissioner / Executive Engineer,
+${data.authority.name},
+Jurisdiction: ${loc}
+
+Subject: Urgent Public Grievance regarding ${data.diagnosis} at ${loc}
+
+Respected Sir / Madam,
+
+I am writing to formally report an active public infrastructure condition requiring inspection and remediation by your department:
+
+• Reported Issue: ${data.diagnosis}
+• Affected Infrastructure: ${data.asset}
+• Precise Location: ${loc}
+• Citizen Observation: ${document.getElementById('descInput').value}
+
+This condition presents an active safety hazard and inconvenience to the commuting public. I respectfully request that an engineering team inspect the site and initiate timely remediation under the Citizen's Charter.
+
+Kindly acknowledge receipt with a Grievance Reference Tracking Number.
+
+Sincerely,
+Concerned Citizen, ${loc}`;
+
+        document.getElementById('btnMailto').href = `mailto:${data.authority.email}?subject=${encodeURIComponent(document.getElementById('govSubjectInput').value)}&body=${encodeURIComponent(document.getElementById('govBodyTextarea').value)}`;
+      } else {
+        govSec.classList.add('hidden');
+      }
+    }
+
+    function submitClarification() {
+      const ans = (document.getElementById('clarificationInput').value || '').toLowerCase();
+      if (ans.includes('public') || ans.includes('street') || ans.includes('road')) {
+        renderDiagnosis('water_burst');
+      } else {
+        renderDiagnosis('sink');
+      }
+    }
+
+    function copyGovEmail() {
+      const text = `Subject: ${document.getElementById('govSubjectInput').value}\n\n${document.getElementById('govBodyTextarea').value}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Complaint email draft copied to clipboard!');
+      });
+    }
+
+    function openMeeKosamPortal() {
+      window.open('https://meekosam.ap.gov.in', '_blank');
+    }
+
+    function detectGPSLocation() {
+      document.getElementById('locInput').value = "Brodipet, Guntur (GPS Detected)";
+    }
+
+    function handleFileChange(event) {
+      if (event.target.files && event.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('imagePreview').src = e.target.result;
+          document.getElementById('imagePreviewWrapper').classList.remove('hidden');
+          document.getElementById('dropzone').classList.add('hidden');
+        };
+        reader.readAsDataURL(event.target.files[0]);
+      }
+    }
+
+    function removeImage() {
+      document.getElementById('imagePreview').src = '';
+      document.getElementById('imagePreviewWrapper').classList.add('hidden');
+      document.getElementById('dropzone').classList.remove('hidden');
+      document.getElementById('fileInput').value = '';
+    }
+
+    function toggleVoiceInput() {
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const rec = new SpeechRec();
+        rec.onstart = () => {
+          document.getElementById('voiceBtnText').textContent = 'Listening...';
+        };
+        rec.onresult = (e) => {
+          document.getElementById('descInput').value = e.results[0][0].transcript;
+        };
+        rec.onend = () => {
+          document.getElementById('voiceBtnText').textContent = 'Voice Input';
+        };
+        rec.start();
+      } else {
+        document.getElementById('descInput').value = "Kitchen sink is completely blocked and water will not drain into the P-trap.";
+      }
+    }
+
+    // Default Scenario on initial load
+    loadScenario('sink');
+  </script>
+</body>
+</html>

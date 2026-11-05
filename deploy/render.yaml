@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: see-and-solve
+    env: node
+    plan: free
+    buildCommand: ""
+    startCommand: "node server/index.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false
+    disk:
+      name: see-and-solve-data
+      mountPath: /app/data
+      sizeGB: 1

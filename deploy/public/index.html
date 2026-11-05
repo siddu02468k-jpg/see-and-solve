@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>See &amp; Solve — AI Visual Problem Diagnostics &amp; Resolution</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <!-- ===================== HEADER & NAVIGATION ===================== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="logo-container" href="/">
+        <div class="logo-badge">🔍</div>
+        <div>
+          <div class="logo-title" data-i18n="appName">See &amp; Solve</div>
+          <div class="logo-subtitle" data-i18n="tagline">AI Visual Diagnostics &amp; Solutions</div>
+        </div>
+      </a>
+
+      <!-- User Journey Progress Stepper -->
+      <div class="stepper-bar">
+        <div class="step-pill active" id="step-pill-1">
+          <span class="step-dot">1</span>
+          <span class="step-name">Report Problem</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-pill" id="step-pill-2">
+          <span class="step-dot">2</span>
+          <span class="step-name">AI Inspection</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-pill" id="step-pill-3">
+          <span class="step-dot">3</span>
+          <span class="step-name">Solution Hub</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="report"><span>📝</span> <span data-i18n="navReport">Report</span></button>
+        <button class="nav-btn" data-tab="reports"><span>📂</span> <span data-i18n="navMyReports">My Reports</span></button>
+        <button class="nav-btn" data-tab="profile"><span>⚙️</span> <span data-i18n="navProfile">Profile</span></button>
+      </nav>
+
+      <div class="header-actions">
+        <select id="global-lang-select" class="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="te">తెలుగు</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+        <div id="user-badge" class="user-badge guest" role="button" tabindex="0" aria-label="Account">
+          <span>👤</span> <span id="user-badge-text">Guest (Sign In)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- ========== TAB: REPORT A PROBLEM ========== -->
+    <section id="tab-report" class="tab-pane active">
+
+      <!-- Problem Submission Form Card -->
+      <div class="form-card">
+        <div class="form-header">
+          <div class="header-badge-row">
+            <span class="pill-badge pill-ai">✨ AI-Powered Diagnostics</span>
+            <span class="pill-badge pill-region">📍 Andhra Pradesh, India</span>
+          </div>
+          <h1 data-i18n="submitTitle">Report a Real-World Problem</h1>
+          <p data-i18n="submitSubtitle">Snap or upload a photo, describe what happened, and receive instant AI diagnosis, safe troubleshooting, animated AI video tutorials, local technicians, or government grievance assistance.</p>
+        </div>
+
+        <!-- Quick Sample Presets -->
+        <div class="presets-container">
+          <span class="presets-label">⚡ Try a Sample Problem:</span>
+          <div class="presets-row">
+            <button type="button" class="preset-btn" data-desc="Kitchen sink is blocked and wastewater is overflowing into the basin" data-loc="Brodipet, Guntur" data-cat="plumbing">🚰 Blocked Sink</button>
+            <button type="button" class="preset-btn" data-desc="Laptop cannot connect to Wi-Fi, network adapter is missing in Windows device manager" data-loc="Governorpet, Vijayawada" data-cat="laptop">💻 Laptop Wi-Fi Broken</button>
+            <button type="button" class="preset-btn" data-desc="Washing machine drum will not drain water after cycle, error code 5E shown" data-loc="Arundelpet, Guntur" data-cat="washer">🧺 Washer Not Draining</button>
+            <button type="button" class="preset-btn" data-desc="Deep hazardous pothole on public arterial road causing traffic congestion and two-wheeler falls" data-loc="Main Road, Guntur" data-cat="pothole">🚧 Road Pothole (Civic)</button>
+            <button type="button" class="preset-btn" data-desc="Damaged public drinking water supply pipeline gushing water onto municipal roadway" data-loc="Dwaraka Nagar, Visakhapatnam" data-cat="pipe">💧 Public Pipeline Leak</button>
+          </div>
+        </div>
+
+        <form id="problem-form" autocomplete="off">
+
+          <!-- Photo Input Section -->
+          <div class="form-group">
+            <label class="form-label" data-i18n="photoLabel">Problem Photograph <span class="req">*</span></label>
+            <input type="file" id="image-file-input" accept="image/*" style="display:none;">
+
+            <!-- Dual Capture / Upload Buttons -->
+            <div class="photo-actions-bar">
+              <button type="button" id="btn-open-camera-modal" class="btn-photo-action btn-camera">
+                <span>📷</span> <span>Open Live Camera</span>
+              </button>
+              <button type="button" id="btn-browse-file" class="btn-photo-action btn-browse">
+                <span>📁</span> <span>Upload from Device</span>
+              </button>
+            </div>
+
+            <!-- Upload Dropzone -->
+            <div id="upload-dropzone" class="upload-dropzone">
+              <div class="dropzone-icon">📸</div>
+              <div class="dropzone-text" data-i18n="photoPrompt">Click above or drag &amp; drop a photo here</div>
+              <div class="dropzone-hint">Supports JPEG, PNG, WebP • Take photo with phone/webcam or choose file</div>
+            </div>
+
+            <!-- Image Preview Box -->
+            <div id="image-preview-wrapper" class="image-preview-wrapper">
+              <img id="image-preview" alt="Problem image preview">
+              <div class="image-preview-actions">
+                <button type="button" id="btn-replace-image" class="btn-overlay" data-i18n="photoChange">🔄 Replace</button>
+                <button type="button" id="btn-remove-image" class="btn-overlay" data-i18n="photoRemove">🗑️ Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem Description (Mandatory) -->
+          <div class="form-group">
+            <label class="form-label" for="problem-description" data-i18n="descLabel">Problem Description <span class="req">*</span></label>
+            <textarea id="problem-description" class="form-textarea" rows="3" required
+              data-i18n-placeholder="descPlaceholder"
+              placeholder="Describe the issue in detail (e.g., 'Kitchen sink is blocked and water will not drain' or 'Deep pothole on main road causing accidents')..."></textarea>
+            
+            <div class="desc-actions-row">
+              <button type="button" id="btn-voice-input" class="voice-btn" data-i18n="voiceButton">
+                <span class="mic-icon">🎤</span> <span id="voice-btn-text">Voice Input</span>
+              </button>
+              <span class="desc-counter-hint">Mandatory description • Voice input supported</span>
+            </div>
+          </div>
+
+          <!-- Location Input & Quick City Selector -->
+          <div class="form-group">
+            <label class="form-label" for="location-input" data-i18n="locationLabel">Location (City, Locality, or District)</label>
+            <div class="input-with-action">
+              <input type="text" id="location-input" class="form-input" 
+                data-i18n-placeholder="locationPlaceholder"
+                placeholder="e.g., Brodipet, Guntur or Vijayawada">
+              <button type="button" id="btn-detect-location" class="action-btn-secondary" data-i18n="detectLocation">
+                <span>📍</span> Use GPS Location
+              </button>
+            </div>
+
+            <!-- Quick City Badges -->
+            <div class="city-chips-container">
+              <span class="chips-title">Quick Select City:</span>
+              <div class="chips-list">
+                <button type="button" class="city-chip" data-city="Guntur" data-lat="16.3067" data-lng="80.4365">Guntur</button>
+                <button type="button" class="city-chip" data-city="Vijayawada" data-lat="16.5062" data-lng="80.6480">Vijayawada</button>
+                <button type="button" class="city-chip" data-city="Visakhapatnam" data-lat="17.6868" data-lng="83.2185">Visakhapatnam</button>
+                <button type="button" class="city-chip" data-city="Tirupati" data-lat="13.6288" data-lng="79.4192">Tirupati</button>
+                <button type="button" class="city-chip" data-city="Rajahmundry" data-lat="17.0005" data-lng="81.8040">Rajahmundry</button>
+                <button type="button" class="city-chip" data-city="Kakinada" data-lat="16.9891" data-lng="82.2475">Kakinada</button>
+                <button type="button" class="city-chip" data-city="Nellore" data-lat="14.4426" data-lng="79.9865">Nellore</button>
+                <button type="button" class="city-chip" data-city="Kurnool" data-lat="15.8281" data-lng="78.0373">Kurnool</button>
+                <button type="button" class="city-chip" data-city="Kadapa" data-lat="14.4674" data-lng="78.8241">Kadapa</button>
+                <button type="button" class="city-chip" data-city="Anantapur" data-lat="14.6819" data-lng="77.6006">Anantapur</button>
+                <button type="button" class="city-chip" data-city="Eluru" data-lat="16.7107" data-lng="81.0952">Eluru</button>
+                <button type="button" class="city-chip" data-city="Ongole" data-lat="15.5057" data-lng="80.0499">Ongole</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Age Selection (Compliance) -->
+          <div class="form-group">
+            <label class="form-label" for="user-age-select" data-i18n="ageLabel">Your Age (Required for tutorial video safety compliance)</label>
+            <select id="user-age-select" class="form-select">
+              <option value="18" selected data-i18n="ageOption18Plus">18 years or older (Eligible for video tutorials)</option>
+              <option value="15" data-i18n="ageOptionUnder18">Under 18 (Tutorial videos withheld for safety)</option>
+              <option value="" data-i18n="ageOptionUnknown">Prefer not to disclose / Unverified</option>
+            </select>
+            <p class="field-hint">Users under 18 receive safe text guidance, while DIY video tutorials are safely withheld.</p>
+          </div>
+
+          <!-- Error Alert -->
+          <div id="form-error-msg" class="form-error-banner" style="display:none;"></div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="btn-submit-problem" class="submit-btn">
+            <span>🔍</span> <span data-i18n="analyzeButton">Analyze Problem with AI</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- ========== RESULTS CONTAINER ========== -->
+      <div id="results-container" class="results-container">
+
+        <!-- Clarification Box -->
+        <div id="clarification-section" class="clarification-box" style="display:none;">
+          <div class="clarification-header">
+            <span class="clarification-icon">🤔</span>
+            <div>
+              <h3>Additional Diagnostic Information Needed</h3>
+              <p>The AI needs one quick clarification before diagnosing the issue:</p>
+            </div>
+          </div>
+          <ol id="clarification-questions" class="clarification-questions-list"></ol>
+          <div class="quick-clarification-row">
+            <span class="quick-title">Quick Answers:</span>
+            <button type="button" class="quick-answer-btn" data-ans="It is inside my private house/apartment.">🏠 Inside Private Home</button>
+            <button type="button" class="quick-answer-btn" data-ans="It is outside on a public street or public road.">🛣️ Outside on Public Road</button>
+            <button type="button" class="quick-answer-btn" data-ans="It started immediately after a storm/heavy rain.">⛈️ After Storm / Rain</button>
+          </div>
+          <textarea id="clarification-answer-input" class="form-textarea" rows="2" placeholder="Type your answer here or select a quick answer above..."></textarea>
+          <button type="button" id="btn-submit-clarification" class="submit-btn" style="margin-top:0.75rem;">Submit Clarification &amp; Refine</button>
+        </div>
+
+        <!-- AI Diagnostics Card -->
+        <div id="diag-section" class="result-card" style="display:none;">
+          <div class="card-header-flex">
+            <div class="card-title-group">
+              <h2 data-i18n="diagnosisTitle">🔬 AI Vision &amp; Technical Analysis</h2>
+              <p>Engine: <span id="diag-model-used">See &amp; Solve Vision Intelligence</span></p>
+            </div>
+            <div class="severity-badge-container">
+              <span id="diag-severity-badge" class="badge badge-moderate">Moderate Risk</span>
+            </div>
+          </div>
+
+          <!-- Visual Severity Meter Gauge -->
+          <div class="severity-gauge-wrapper">
+            <div class="gauge-meter-box">
+              <svg class="gauge-svg" viewBox="0 0 200 110">
+                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e2e8f0" stroke-width="16" stroke-linecap="round"/>
+                <path id="gauge-arc-green" d="M 20 100 A 80 80 0 0 1 65 35" fill="none" stroke="#22c55e" stroke-width="16"/>
+                <path id="gauge-arc-amber" d="M 65 35 A 80 80 0 0 1 135 35" fill="none" stroke="#f59e0b" stroke-width="16"/>
+                <path id="gauge-arc-red" d="M 135 35 A 80 80 0 0 1 180 100" fill="none" stroke="#ef4444" stroke-width="16"/>
+                <line id="gauge-needle" x1="100" y1="100" x2="100" y2="30" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="100" cy="100" r="8" fill="#0f172a"/>
+              </svg>
+              <div class="gauge-labels">
+                <span style="color:#16a34a;">Low DIY</span>
+                <span style="color:#d97706;">Moderate</span>
+                <span style="color:#dc2626;">Hazard / Pro</span>
+              </div>
+            </div>
+            <div class="gauge-details">
+              <div class="diag-item-label">Diagnosis Overview</div>
+              <h3 id="diag-likely-issue" class="diag-primary-title">—</h3>
+              <p class="diag-asset-line"><strong>Affected Asset:</strong> <span id="diag-affected-object">—</span></p>
+            </div>
+          </div>
+
+          <!-- Symptoms List -->
+          <div class="diag-item" style="margin-bottom:0.75rem;">
+            <div class="diag-item-label" data-i18n="symptomsLabel">Visible Symptoms &amp; Clues</div>
+            <ul id="diag-symptoms" class="diag-list"></ul>
+          </div>
+
+          <!-- Empirical Facts vs Plausible Assumptions -->
+          <div class="evidence-grid">
+            <div class="facts-box">
+              <div class="box-header">
+                <span class="box-icon">📌</span>
+                <span class="box-title" data-i18n="factsLabel">Observed Facts (Visual Evidence)</span>
+              </div>
+              <div id="diag-facts" class="box-content"></div>
+            </div>
+
+            <div class="assumptions-box">
+              <div class="box-header">
+                <span class="box-icon">💡</span>
+                <span class="box-title" data-i18n="assumptionsLabel">Plausible Causes &amp; Assumptions</span>
+              </div>
+              <div id="diag-assumptions" class="box-content"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Safe Troubleshooting Section -->
+        <div id="trouble-section" class="result-card" style="display:none;">
+          <h2 data-i18n="troubleshootingTitle">🛠️ Safe Step-by-Step Troubleshooting</h2>
+          <p class="section-subtext">Preliminary checklist and safe DIY steps. Stop immediately if any hazard appears.</p>
+
+          <div class="safety-checklist-card">
+            <h4>📋 Preliminary Safety Checklist (Verify before starting):</h4>
+            <div id="trouble-checks" class="interactive-checklist"></div>
+          </div>
+
+          <div class="steps-heading">Resolution Procedure:</div>
+          <div id="trouble-steps" class="step-list"></div>
+          <div id="trouble-stop-box" class="stop-warning-box"></div>
+        </div>
+
+        <!-- AI Interactive Video Player & YouTube Tutorials Section -->
+        <div id="video-section" class="result-card" style="display:none;">
+          <div class="card-header-flex">
+            <div class="card-title-group">
+              <h2 data-i18n="videoTitle">🎥 Problem Resolution Video Tutorials</h2>
+              <p class="section-subtext">AI-generated step-by-step visual player with audio narration, plus verified instructional channels.</p>
+            </div>
+            <div class="video-mode-toggles">
+              <button type="button" id="tab-btn-ai-video" class="video-tab-btn active">🤖 AI Video Player</button>
+              <button type="button" id="tab-btn-yt-video" class="video-tab-btn">📺 YouTube Channels</button>
+            </div>
+          </div>
+
+          <!-- Notice box when age restricted or withheld -->
+          <div id="video-notice-box" class="video-notice-box" style="display:none;"></div>
+
+          <!-- AI Interactive Video Player Container -->
+          <div id="ai-video-player-container" class="ai-player-wrapper">
+            <div class="ai-player-stage">
+              <div class="ai-player-header">
+                <span id="ai-video-title" class="ai-player-title">AI Step-by-Step Visual Tutorial</span>
+                <span id="ai-video-step-tag" class="ai-player-step-tag">Step 1 of 4</span>
+              </div>
+
+              <!-- Animated Visual Stage / Canvas -->
+              <div class="ai-visual-canvas-box">
+                <canvas id="ai-visual-canvas" width="640" height="360"></canvas>
+                <div id="ai-player-overlay" class="ai-player-overlay">
+                  <div class="ai-overlay-instruction-box">
+                    <span id="ai-overlay-step-title" class="ai-step-title">Step 1: Safety &amp; Area Preparation</span>
+                    <p id="ai-overlay-instruction" class="ai-step-text">Ensure all power and water supplies are isolated.</p>
+                    <div id="ai-overlay-outcome" class="ai-step-outcome">Expected: Safe workspace ready.</div>
+                  </div>
+                </div>
+
+                <!-- Big Centered Play Trigger when paused -->
+                <button type="button" id="btn-ai-play-big" class="ai-play-big-btn" aria-label="Play AI Tutorial">▶</button>
+              </div>
+
+              <!-- Subtitles / Closed Captions bar -->
+              <div id="ai-subtitles-bar" class="ai-subtitles-bar">
+                <span id="ai-subtitles-text">Press Play to begin the step-by-step AI visual walkthrough with audio narration.</span>
+              </div>
+
+              <!-- Video Controls Bar -->
+              <div class="ai-player-controls">
+                <!-- Timeline Scrubber -->
+                <div class="ai-scrubber-track" id="ai-scrubber">
+                  <div id="ai-scrubber-progress" class="ai-scrubber-progress"></div>
+                </div>
+
+                <div class="ai-controls-row">
+                  <div class="ai-controls-left">
+                    <button type="button" id="btn-ai-play" class="ctrl-btn" title="Play / Pause">▶ Play</button>
+                    <button type="button" id="btn-ai-prev" class="ctrl-btn" title="Previous Step">⏮ Prev</button>
+                    <button type="button" id="btn-ai-next" class="ctrl-btn" title="Next Step">Next ⏭</button>
+                    <span id="ai-time-display" class="ai-time-text">0:00 / 0:48</span>
+                  </div>
+
+                  <div class="ai-controls-right">
+                    <button type="button" id="btn-ai-voice-toggle" class="ctrl-btn active" title="Toggle AI Voice Narration">🔊 Voice On</button>
+                    <button type="button" id="btn-ai-cc-toggle" class="ctrl-btn active" title="Toggle Subtitles">CC</button>
+                    <button type="button" id="btn-ai-restart" class="ctrl-btn" title="Restart Tutorial">🔄 Restart</button>
+                  </div>
+                </div>
+
+                <!-- Step Chapter Pills -->
+                <div id="ai-chapter-pills" class="ai-chapters-row"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- YouTube Video Grid Container -->
+          <div id="yt-video-container" style="display:none;">
+            <div id="video-grid" class="video-card-grid"></div>
+          </div>
+        </div>
+
+        <!-- Technicians Section -->
+        <div id="tech-section" class="result-card" style="display:none;">
+          <div class="card-header-flex">
+            <div class="card-title-group">
+              <h2 data-i18n="technicianTitle">🔧 Verified Local Technicians</h2>
+              <p id="tech-header-subtitle">Specialization &amp; search area</p>
+            </div>
+          </div>
+          <div id="tech-notice-box" class="video-notice-box" style="display:none;"></div>
+          <div id="tech-grid" class="tech-grid"></div>
+        </div>
+
+        <!-- Government Complaint Section -->
+        <div id="gov-section" class="result-card" style="display:none;">
+          <h2 data-i18n="govTitle">🏛️ Government Complaint Assistance</h2>
+          <p class="section-subtext">
+            This issue belongs to public/municipal civic infrastructure. Use the details below to file a formal complaint with the responsible authority.
+          </p>
+
+          <div id="gov-authority-card" class="gov-authority-box"></div>
+
+          <div class="gov-email-editor">
+            <label for="gov-email-subject">Complaint Subject Line</label>
+            <input type="text" id="gov-email-subject" class="form-input" style="margin-bottom:0.75rem;">
+            <label for="gov-email-body">Personalized Formal Complaint Draft (Editable)</label>
+            <textarea id="gov-email-body" class="form-textarea" rows="8"></textarea>
+          </div>
+
+          <div class="gov-actions-row">
+            <button type="button" id="btn-copy-email" class="btn-action-gov" style="background:var(--gray-800); color:white;">📋 Copy Complaint Draft</button>
+            <a id="btn-open-mailto" href="#" class="btn-action-gov" style="background:var(--primary); color:white; text-decoration:none;">✉️ Open in Email App</a>
+            <button type="button" id="btn-open-portal" class="btn-action-gov btn-gov-portal">🌐 Open Official Grievance Portal</button>
+          </div>
+        </div>
+
+        <!-- Save Report Prompt (for guests) -->
+        <div id="save-report-row" style="display:none; text-align:center; margin-top:1.5rem;">
+          <p style="color:var(--gray-700); margin-bottom:0.75rem;">Sign in to save this diagnostic report to your personal history.</p>
+          <button type="button" id="btn-save-report" class="submit-btn" style="max-width:320px; margin:0 auto;">Sign In to Save Report</button>
+        </div>
+
+      </div><!-- /results-container -->
+    </section>
+
+    <!-- ========== TAB: MY REPORTS ========== -->
+    <section id="tab-reports" class="tab-pane">
+      <div class="form-card">
+        <div class="form-header">
+          <h1>📂 My Saved Reports</h1>
+          <p>View, manage, and revisit your past problem diagnosis reports.</p>
+        </div>
+        <div id="reports-list-container"></div>
+        <div id="no-reports-notice" style="display:none; text-align:center; padding:2rem; color:var(--gray-500);">
+          No saved reports found.
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TAB: PROFILE & SETTINGS ========== -->
+    <section id="tab-profile" class="tab-pane">
+      <div class="form-card">
+        <div class="form-header">
+          <h1>⚙️ Profile &amp; Settings</h1>
+          <p>Manage your account, review system status, and sign out.</p>
+        </div>
+        <div id="profile-container">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+            <div class="diag-item">
+              <div class="diag-item-label">Name</div>
+              <div class="diag-item-value" id="profile-name">—</div>
+            </div>
+            <div class="diag-item">
+              <div class="diag-item-label">Email</div>
+              <div class="diag-item-value" id="profile-email">—</div>
+            </div>
+            <div class="diag-item">
+              <div class="diag-item-label">Age</div>
+              <div class="diag-item-value" id="profile-age">—</div>
+            </div>
+          </div>
+
+          <div id="api-health-container" style="margin-bottom:1.5rem;"></div>
+
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button type="button" id="btn-logout" class="submit-btn" style="background:var(--gray-700); max-width:200px;">Logout</button>
+            <button type="button" id="btn-delete-account" class="submit-btn" style="background:var(--danger); max-width:200px;">Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== LIVE CAMERA MODAL ===================== -->
+  <div id="camera-modal" class="modal-overlay">
+    <div class="camera-card">
+      <div class="camera-header">
+        <span class="camera-title">📷 Live Camera Viewfinder</span>
+        <button type="button" id="btn-close-camera" class="modal-close">&times;</button>
+      </div>
+
+      <div class="camera-viewport-box">
+        <video id="camera-video-feed" autoplay playsinline muted></video>
+        <canvas id="camera-capture-canvas" style="display:none;"></canvas>
+        <div class="camera-reticle"></div>
+        <div id="camera-loading-overlay" class="camera-loading">Starting camera stream...</div>
+      </div>
+
+      <div class="camera-controls-bar">
+        <button type="button" id="btn-flip-camera" class="btn-camera-ctrl" title="Flip Camera">
+          <span>🔄</span> <span>Flip Camera</span>
+        </button>
+        <button type="button" id="btn-snap-photo" class="btn-camera-snap" title="Take Photo">
+          <div class="snap-inner-circle"></div>
+        </button>
+        <button type="button" id="btn-cancel-camera" class="btn-camera-ctrl" title="Cancel">
+          <span>✕</span> <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== AUTH MODAL ===================== -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-card">
+      <button id="modal-close-btn" class="modal-close" aria-label="Close">&times;</button>
+      <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:1.25rem;">Account Access</h2>
+
+      <div style="display:flex; gap:0.5rem; margin-bottom:1.25rem;">
+        <button type="button" id="auth-tab-login" class="nav-btn active" style="flex:1; justify-content:center;">Sign In</button>
+        <button type="button" id="auth-tab-register" class="nav-btn" style="flex:1; justify-content:center;">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="auth-form-login">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Your password" required minlength="6">
+        </div>
+        <div id="login-error-msg" style="display:none; color:var(--danger); font-size:0.85rem; margin-bottom:0.75rem;"></div>
+        <button type="submit" class="submit-btn">Sign In</button>
+        <p style="text-align:center; margin-top:0.75rem; font-size:0.85rem;">
+          <a href="#" id="forgot-password-link" style="color:var(--primary);">Forgot password?</a>
+        </p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="auth-form-register" style="display:none;">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password (min. 6 characters)</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Choose a strong password" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-age">Your Age</label>
+          <input type="number" id="reg-age" class="form-input" placeholder="e.g., 25" min="5" max="120">
+        </div>
+        <div id="reg-error-msg" style="display:none; color:var(--danger); font-size:0.85rem; margin-bottom:0.75rem;"></div>
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== FORGOT PASSWORD MODAL ===================== -->
+  <div id="forgot-modal" class="modal-overlay">
+    <div class="modal-card">
+      <button id="forgot-modal-close" class="modal-close" aria-label="Close">&times;</button>
+      <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:1rem;">Reset Password</h2>
+      <p style="font-size:0.9rem; color:var(--gray-500); margin-bottom:1.25rem;">Enter your email address to request a password reset.</p>
+      <form id="forgot-form">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email">Email Address</label>
+          <input type="email" id="forgot-email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div id="forgot-msg" style="display:none; font-size:0.85rem; margin-bottom:0.75rem;"></div>
+        <button type="submit" class="submit-btn">Request Password Reset</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST NOTIFICATION ===================== -->
+  <div id="toast-msg" class="toast-msg"></div>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script src="/js/i18n-client.js"></script>
+  <script src="/js/app.js"></script>
+
+</body>
+</html>
