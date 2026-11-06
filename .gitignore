@@ -1,0 +1,51 @@
+# =============================================================================
+# SEE & SOLVE SECURITY - SENSITIVE FILES & CREDENTIALS PROTECTION (.gitignore)
+# =============================================================================
+
+# Environment variables & secrets (NEVER commit live API keys or secrets!)
+.env
+.env.*
+!.env.example
+*.env
+
+# SQLite persistent database files (contains user credentials & private reports)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/see_and_solve.db
+
+# User uploaded images & media
+data/uploads/*
+!data/uploads/.gitkeep
+
+# System & OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+*.swp
+
+# Logs and debug output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node modules (if ever used)
+node_modules/
+
+# Local certificate & private keys
+*.pem
+*.key
+*.cert
+*.crt
+
+# Local test scratch artifacts
+open_app.html

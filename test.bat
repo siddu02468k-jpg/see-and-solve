@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo ===================================================================
-echo   SEE ^& SOLVE - RUNNING ALL 13 ACCEPTANCE TESTS
+echo   SEE ^& SOLVE - RUNNING ACCEPTANCE ^& SECURITY TEST SUITES
 echo ===================================================================
 
 :: Ensure Node is available
@@ -22,11 +22,22 @@ if %ERRORLEVEL% NEQ 0 (
     )
 )
 
+echo [1/2] Running 14 Functional Acceptance Scenarios...
 "%NODE_EXE%" tests\acceptance.test.js
-
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Tests failed with exit code %ERRORLEVEL%
+    echo [ERROR] Acceptance tests failed with exit code %ERRORLEVEL%
     pause
-) else (
-    echo [SUCCESS] All acceptance tests executed and passed.
+    exit /b 1
 )
+
+echo.
+echo [2/2] Running Comprehensive Security Audit Suite...
+"%NODE_EXE%" tests\security.test.js
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Security audit failed with exit code %ERRORLEVEL%
+    pause
+    exit /b 1
+)
+
+echo.
+echo [SUCCESS] All functional and security tests passed with 100% compliance.
