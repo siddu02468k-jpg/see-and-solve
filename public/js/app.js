@@ -56,6 +56,11 @@
     forgotModalClose: document.getElementById('forgot-modal-close'),
     forgotForm: document.getElementById('forgot-form'),
     langSelector: document.getElementById('global-lang-select'),
+    themeToggleBtn: document.getElementById('theme-toggle-btn'),
+    resultsQuickNav: document.getElementById('results-quick-nav'),
+    btnScrollTop: document.getElementById('btn-scroll-top'),
+    mobileNavItems: document.querySelectorAll('.mobile-bottom-nav .m-nav-item'),
+    mNavSolutions: document.getElementById('m-nav-solutions'),
 
     // Problem Submission Form
     problemForm: document.getElementById('problem-form'),
@@ -201,6 +206,14 @@
     els.tabButtons.forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
     });
+    if (els.mobileNavItems) {
+      els.mobileNavItems.forEach(item => {
+        const itemTab = item.getAttribute('data-tab');
+        if (itemTab) {
+          item.classList.toggle('active', itemTab === tabId);
+        }
+      });
+    }
     els.tabPanes.forEach(pane => {
       pane.classList.toggle('active', pane.id === `tab-${tabId}`);
     });
@@ -215,6 +228,58 @@
   els.tabButtons.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
   });
+
+  // Mobile Bottom Navigation
+  if (els.mobileNavItems) {
+    els.mobileNavItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const tab = item.getAttribute('data-tab');
+        if (tab) {
+          switchTab(tab);
+        }
+      });
+    });
+  }
+  if (els.mNavSolutions) {
+    els.mNavSolutions.addEventListener('click', () => {
+      switchTab('report');
+      if (els.resultsContainer) {
+        els.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  // Theme Management (Dark / Light)
+  const savedTheme = localStorage.getItem('see_and_solve_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('see_and_solve_theme', theme);
+    if (els.themeToggleBtn) {
+      els.themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌓';
+      els.themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme');
+    }
+  }
+  applyTheme(savedTheme);
+  if (els.themeToggleBtn) {
+    els.themeToggleBtn.addEventListener('click', () => {
+      const curTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      applyTheme(curTheme === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  // Floating Scroll-to-Top Button
+  if (els.btnScrollTop) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 280) {
+        els.btnScrollTop.classList.add('visible');
+      } else {
+        els.btnScrollTop.classList.remove('visible');
+      }
+    });
+    els.btnScrollTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   // Language Change
   if (els.langSelector) {
@@ -243,6 +308,7 @@
       if (data.success && data.user) {
         currentUser = data.user;
         updateUserBadge(data.user);
+        if (currentUser.age) syncAgeChoice(currentUser.age);
       } else {
         currentUser = null;
         updateUserBadge(null);
@@ -324,6 +390,7 @@
           currentUser = data.user;
           localStorage.setItem('see_and_solve_token', data.token);
           updateUserBadge(data.user);
+          if (data.user && data.user.age) syncAgeChoice(data.user.age);
           closeAuthModal();
           showToast(`Welcome back, ${data.user.name || data.user.email}!`);
           if (currentReportData) saveCurrentReportToAccount();
@@ -366,6 +433,7 @@
           currentUser = data.user;
           localStorage.setItem('see_and_solve_token', data.token);
           updateUserBadge(data.user);
+          if (data.user && data.user.age) syncAgeChoice(data.user.age);
           closeAuthModal();
           showToast(`Account created successfully. Welcome, ${data.user.name}!`);
           if (currentReportData) saveCurrentReportToAccount();
@@ -576,7 +644,7 @@
       const loc = btn.getAttribute('data-loc');
       if (els.descInput) els.descInput.value = desc;
       if (els.locationInput) els.locationInput.value = loc;
-      if (els.ageSelect) els.ageSelect.value = "18";
+      syncAgeChoice("18");
       showToast(`Preset loaded: ${btn.textContent.trim()}`);
       if (els.descInput) els.descInput.focus();
     });
@@ -595,6 +663,50 @@
       }
       window.lastKnownCoords = { lat, lng };
       showToast(`Location set to ${city}`);
+    });
+  });
+
+  // =========================================================================
+  // AGE VERIFICATION & EQUAL ACCESS FOR ALL USERS (GUESTS & SIGNED-UP)
+  // =========================================================================
+  function syncAgeChoice(val) {
+    const ageNum = parseInt(val) || 18;
+    const effectiveAge = ageNum >= 18 ? "18" : "15";
+    if (els.ageSelect) els.ageSelect.value = effectiveAge;
+
+    const radios = document.querySelectorAll('input[name="age-option"]');
+    radios.forEach(r => {
+      r.checked = (r.value === effectiveAge);
+    });
+
+    const card18 = document.getElementById('age-choice-18');
+    const cardMinor = document.getElementById('age-choice-minor');
+    if (card18 && cardMinor) {
+      if (effectiveAge === "18") {
+        card18.classList.add('selected');
+        cardMinor.classList.remove('selected');
+      } else {
+        cardMinor.classList.add('selected');
+        card18.classList.remove('selected');
+      }
+    }
+  }
+
+  // Wire radio button change events
+  document.querySelectorAll('input[name="age-option"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      syncAgeChoice(e.target.value);
+    });
+  });
+
+  // Make entire card interactive
+  document.querySelectorAll('.age-choice-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio && e.target !== radio) {
+        radio.checked = true;
+        syncAgeChoice(radio.value);
+      }
     });
   });
 
@@ -830,8 +942,34 @@
     els.resultsContainer.classList.add('visible');
     els.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    if (els.resultsQuickNav) els.resultsQuickNav.style.display = 'block';
+    if (els.mNavSolutions) els.mNavSolutions.style.display = 'flex';
+
     const ai = data.aiAnalysis;
     const sections = data.sections || {};
+
+    // Filter quick nav tabs based on generated sections
+    const qnavTrouble = document.getElementById('qnav-trouble');
+    const qnavVideo = document.getElementById('qnav-video');
+    const qnavTech = document.getElementById('qnav-tech');
+    const qnavGov = document.getElementById('qnav-gov');
+    if (qnavTrouble) qnavTrouble.style.display = sections.showTroubleshooting ? 'inline-flex' : 'none';
+    if (qnavVideo) qnavVideo.style.display = sections.showVideos ? 'inline-flex' : 'none';
+    if (qnavTech) qnavTech.style.display = sections.showTechnicians ? 'inline-flex' : 'none';
+    if (qnavGov) qnavGov.style.display = sections.showGovernmentHelp ? 'inline-flex' : 'none';
+
+    // Wire quick nav jump buttons
+    document.querySelectorAll('.qnav-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.qnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+    });
 
     // 1. Clarification needed
     if (data.needsClarification) {
@@ -922,6 +1060,12 @@
           <input type="checkbox" id="chk-${idx}">
           <span>${escapeHtml(chk)}</span>
         `;
+        const chkBox = label.querySelector('input[type="checkbox"]');
+        if (chkBox) {
+          chkBox.addEventListener('change', () => {
+            label.classList.toggle('completed', chkBox.checked);
+          });
+        }
         els.troubleChecks.appendChild(label);
       });
 
@@ -974,7 +1118,88 @@
       els.aiVideoPlayerContainer.style.display = 'none';
       els.ytVideoContainer.style.display = 'none';
       els.videoNotice.style.display = 'block';
-      els.videoNotice.innerHTML = `<strong>🛡️ Tutorial Video Compliance:</strong> ${escapeHtml(vidData.reason || 'Videos are unavailable or withheld for safety compliance.')}`;
+
+      // Check whether this issue is genuinely unsafe for DIY vs purely an age verification check
+      const isHazardOrPublic = !ai || !ai.is_suitable_for_safe_troubleshooting || ai.is_government_related;
+
+      if (isHazardOrPublic) {
+        els.videoNotice.innerHTML = `<strong>🛡️ Safety Compliance:</strong> ${escapeHtml(vidData.reason || 'DIY tutorial videos are strictly withheld for hazardous or public infrastructure work.')}`;
+      } else {
+        // Safe DIY task! Directly prompt the user for their age — equal features for guests & signed-up users
+        els.videoNotice.innerHTML = `
+          <div class="age-unlock-banner">
+            <div style="font-size:2rem; margin-bottom:0.35rem;">🔞</div>
+            <h4>Age Verification Required to Unlock AI Video Tutorials</h4>
+            <p>Safety regulations require confirming you are 18 or older to view mechanical and electrical repair tutorial videos. <strong>No sign-in or account is required</strong> — verify your age below to unlock full AI tutorials:</p>
+            <div class="age-unlock-actions">
+              <button type="button" id="btn-inline-verify-age" class="btn-unlock-videos">
+                <span>🔞</span> <span>I am 18 or Older — Unlock AI Videos Now</span>
+              </button>
+              <button type="button" id="btn-inline-stay-minor" class="btn-keep-minor">
+                <span>🛡️</span> <span>I am Under 18 (Keep Safe Text Only)</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        const btnVerify = document.getElementById('btn-inline-verify-age');
+        if (btnVerify) {
+          btnVerify.onclick = async () => {
+            btnVerify.disabled = true;
+            btnVerify.innerHTML = `<span class="spinner"></span> <span>Unlocking AI Videos...</span>`;
+            try {
+              const verifyRes = await fetch('/api/reports/verify-age', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  age: 18,
+                  tutorialSearchQuery: ai.tutorial_search_query || ai.likely_issue,
+                  isSafeForDIY: true,
+                  technicalCategory: ai.technical_category,
+                  language: els.langSelector ? els.langSelector.value : 'en',
+                  troubleshootingSteps: data.safeTroubleshooting?.steps || ai.troubleshooting_steps || [],
+                  likelyIssue: ai.likely_issue,
+                  affectedObject: ai.affected_asset_or_service,
+                  safeChecks: data.safeTroubleshooting?.safePreliminaryChecks || ai.safe_preliminary_checks || []
+                })
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success && verifyData.tutorialVideos && verifyData.tutorialVideos.eligible) {
+                data.tutorialVideos = verifyData.tutorialVideos;
+                data.sections.showVideos = true;
+                syncAgeChoice(18);
+                showToast('✓ Age confirmed (18+). AI video tutorials unlocked!');
+                els.videoNotice.style.display = 'none';
+                if (verifyData.tutorialVideos.aiTutorialVideo) {
+                  initAiVideoPlayer(verifyData.tutorialVideos.aiTutorialVideo);
+                }
+                if (verifyData.tutorialVideos.videos && verifyData.tutorialVideos.videos.length > 0) {
+                  renderVideoCards(verifyData.tutorialVideos.videos);
+                }
+              } else {
+                showToast('Could not unlock videos: ' + (verifyData.error || 'Verification failed'));
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = `<span>🔞</span> <span>I am 18 or Older — Unlock AI Videos Now</span>`;
+              }
+            } catch (err) {
+              showToast('Network error during age verification.');
+              btnVerify.disabled = false;
+              btnVerify.innerHTML = `<span>🔞</span> <span>I am 18 or Older — Unlock AI Videos Now</span>`;
+            }
+          };
+        }
+
+        const btnMinor = document.getElementById('btn-inline-stay-minor');
+        if (btnMinor) {
+          btnMinor.onclick = () => {
+            els.videoNotice.innerHTML = `
+              <div style="padding:1rem; text-align:center;">
+                <p><strong>🛡️ Safety Mode Active:</strong> Tutorial videos are withheld for users under 18. Please follow the safe preliminary checklist above or contact a verified local technician.</p>
+              </div>
+            `;
+          };
+        }
+      }
     } else {
       els.videoSection.style.display = 'none';
     }
