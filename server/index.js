@@ -51,25 +51,149 @@ const MIME_TYPES = {
   '.webp': 'image/webp'
 };
 
-function sendJson(res, statusCode, data) {
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// =============================================================================
+// DEFENSIVE SECURITY CONTROLS: HEADERS, CSP, CORS & RATE LIMITING
+// =============================================================================
+
+// Strict Security Headers + Content Security Policy (CSP)
+function getSecurityHeaders(isHtml = false, origin = null) {
+  const headers = {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'X-XSS-Protection': '1; mode=block',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=(self)'
+  };
+
+  headers['Content-Security-Policy'] = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https: blob:",
+    "media-src 'self' blob:",
+    "font-src 'self'",
+    "connect-src 'self' https://nominatim.openstreetmap.org https://meekosam.ap.gov.in",
+    "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ].join('; ');
+
+  if (IS_PROD) {
+    headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
+  }
+
+  // Safe CORS Policy
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (origin && (allowedOrigins.length === 0 || allowedOrigins.includes(origin) || !IS_PROD)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  } else if (!origin && allowedOrigins.length === 0) {
+    headers['Access-Control-Allow-Origin'] = '*';
+  }
+
+  headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Admin-Key';
+  headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+
+  return headers;
+}
+
+function sendJson(res, statusCode, data, origin = null, extraHeaders = {}) {
   const jsonStr = JSON.stringify(data);
+  const secHeaders = getSecurityHeaders(false, origin);
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(jsonStr),
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'X-Content-Type-Options': 'nosniff'
+    ...secHeaders,
+    ...extraHeaders
   });
   res.end(jsonStr);
 }
 
-function sendError(res, statusCode, message, details = null) {
+function sendError(res, statusCode, message, details = null, origin = null, extraHeaders = {}) {
+  // Turn off debug details in production to eliminate internal information disclosure
+  const safeMessage = (statusCode >= 500 && IS_PROD)
+    ? 'An unexpected server error occurred. Please try again later.'
+    : message;
+  const safeDetails = IS_PROD ? null : details;
+
   sendJson(res, statusCode, {
     success: false,
-    error: message,
-    details
-  });
+    error: safeMessage,
+    details: safeDetails
+  }, origin, extraHeaders);
+}
+
+// In-Memory Sliding-Window Rate Limiter (Zero Dependencies)
+const rateLimitBuckets = new Map();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitBuckets.entries()) {
+    if (now > val.resetTime) {
+      rateLimitBuckets.delete(key);
+    }
+  }
+}, 5 * 60 * 1000).unref();
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || '127.0.0.1';
+}
+
+function checkRateLimit(req, bucketName, maxRequests, windowMs) {
+  if (process.env.NODE_ENV === 'test' || process.env.DISABLE_RATE_LIMIT === 'true') {
+    return { allowed: true, remaining: maxRequests };
+  }
+
+  const ip = getClientIp(req);
+  const key = `${bucketName}:${ip}`;
+  const now = Date.now();
+
+  let bucket = rateLimitBuckets.get(key);
+  if (!bucket || now > bucket.resetTime) {
+    bucket = { count: 1, resetTime: now + windowMs };
+    rateLimitBuckets.set(key, bucket);
+    return { allowed: true, remaining: maxRequests - 1 };
+  }
+
+  bucket.count++;
+  if (bucket.count > maxRequests) {
+    const retryAfter = Math.ceil((bucket.resetTime - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+
+  return { allowed: true, remaining: maxRequests - bucket.count };
+}
+
+// Server-side string sanitization to protect against XSS and control character injection
+function sanitizeString(input, maxLength = 4000) {
+  if (typeof input !== 'string') return '';
+  let str = input.slice(0, maxLength);
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  str = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  str = str.replace(/javascript\s*:/gi, 'blocked:');
+  str = str.replace(/data\s*:\s*text\/html/gi, 'blocked:');
+  return str.trim();
+}
+
+// Role-based admin route protection
+function requireAdmin(req) {
+  const adminKey = req.headers['x-admin-key'];
+  if (process.env.ADMIN_API_KEY && adminKey && adminKey === process.env.ADMIN_API_KEY) {
+    return { id: 'admin-key-holder', email: 'admin@system.local', is_admin: true };
+  }
+
+  const user = getAuthUser(req);
+  if (user && user.is_admin === true) {
+    return user;
+  }
+  return null;
 }
 
 function parseCookies(cookieHeader) {
@@ -123,19 +247,54 @@ function parseRequestBody(req) {
 }
 
 async function handleRequest(req, res) {
+  const origin = req.headers['origin'] || null;
+
   // CORS Preflight
   if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
-    });
+    const secHeaders = getSecurityHeaders(false, origin);
+    res.writeHead(204, secHeaders);
     return res.end();
+  }
+
+  const rawUrl = req.url || '';
+  let decodedUrl = '';
+  try {
+    decodedUrl = decodeURIComponent(rawUrl);
+  } catch (e) {
+    decodedUrl = rawUrl;
+  }
+
+  // 1. Path Traversal & Suspicious Character Defense
+  if (rawUrl.includes('..') || decodedUrl.includes('..') || rawUrl.includes('\0') || decodedUrl.includes('\0')) {
+    res.writeHead(403, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
+    return res.end('Access Denied: Path traversal detected.');
   }
 
   const parsedUrl = new URL(req.url, 'http://localhost');
   const pathname = parsedUrl.pathname;
   const method = req.method.toUpperCase();
+
+  // 2. Block direct HTTP exposure of sensitive system/config/database files
+  const BLOCKED_FILES = [
+    '.env', '.gitignore', '.git', 'package.json', 'render.yaml',
+    'dockerfile', 'docker-compose.yml', 'start.bat', 'test.bat',
+    'host_tunnel.bat', 'pack_project.bat', 'acceptance.test.js'
+  ];
+  const lowerPath = pathname.toLowerCase();
+  if (BLOCKED_FILES.some(b => lowerPath.endsWith('/' + b) || lowerPath === '/' + b || lowerPath.includes('.db'))) {
+    res.writeHead(403, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
+    return res.end('Access Denied: Protected resource.');
+  }
+
+  // 3. Global API Rate Limiting (150 requests per minute)
+  if (pathname.startsWith('/api/')) {
+    const globalLimit = checkRateLimit(req, 'global_api', 150, 60 * 1000);
+    if (!globalLimit.allowed) {
+      return sendError(res, 429, 'Too many requests. Please slow down and try again later.', null, origin, {
+        'Retry-After': String(globalLimit.retryAfter)
+      });
+    }
+  }
 
   try {
     // =========================================================================
@@ -177,9 +336,91 @@ async function handleRequest(req, res) {
       });
     }
 
+    // =========================================================================
+    // ADMIN ROUTES (Protected with Strict Role-Based Access Control)
+    // =========================================================================
+
+    // A1. Admin Metrics & Health Monitoring
+    if (pathname === '/api/admin/metrics' && method === 'GET') {
+      const admin = requireAdmin(req);
+      if (!admin) {
+        return sendError(res, 403, 'Forbidden: Administrative credentials required.', null, origin);
+      }
+
+      const totalUsers = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
+      const totalReports = db.prepare('SELECT COUNT(*) as count FROM reports').get().count;
+      const activeSessions = db.prepare('SELECT COUNT(*) as count FROM sessions WHERE expires_at > ?').get(new Date().toISOString()).count;
+
+      return sendJson(res, 200, {
+        success: true,
+        adminUser: admin.email,
+        serverTime: new Date().toISOString(),
+        uptimeSeconds: Math.floor(process.uptime()),
+        memoryUsage: process.memoryUsage(),
+        environment: process.env.NODE_ENV || 'development',
+        stats: {
+          totalUsers,
+          totalReports,
+          activeSessions
+        },
+        rateLimiter: {
+          activeBuckets: rateLimitBuckets.size
+        }
+      }, origin);
+    }
+
+    // A2. Admin Reports List (Oversight)
+    if (pathname === '/api/admin/reports' && method === 'GET') {
+      const admin = requireAdmin(req);
+      if (!admin) {
+        return sendError(res, 403, 'Forbidden: Administrative credentials required.', null, origin);
+      }
+
+      const rows = db.prepare(`
+        SELECT id, user_id, description, location_city, status, created_at
+        FROM reports
+        ORDER BY created_at DESC
+        LIMIT 50
+      `).all();
+
+      return sendJson(res, 200, { success: true, count: rows.length, reports: rows }, origin);
+    }
+
+    // A3. Admin Users List
+    if (pathname === '/api/admin/users' && method === 'GET') {
+      const admin = requireAdmin(req);
+      if (!admin) {
+        return sendError(res, 403, 'Forbidden: Administrative credentials required.', null, origin);
+      }
+
+      const users = db.prepare(`
+        SELECT id, email, name, age, preferred_language, is_admin, created_at
+        FROM users
+        ORDER BY created_at DESC
+        LIMIT 50
+      `).all();
+
+      return sendJson(res, 200, { success: true, count: users.length, users }, origin);
+    }
+
+    // =========================================================================
+    // AUTHENTICATION ROUTES (Protected with Rate Limiting)
+    // =========================================================================
+
     // 2. Authentication: Register
     if (pathname === '/api/auth/register' && method === 'POST') {
+      const authLimit = checkRateLimit(req, 'auth_ops', 20, 5 * 60 * 1000);
+      if (!authLimit.allowed) {
+        return sendError(res, 429, 'Too many registration attempts. Please wait 5 minutes.', null, origin, {
+          'Retry-After': String(authLimit.retryAfter)
+        });
+      }
+
       const data = await parseRequestBody(req);
+      // Sanitize input
+      data.name = sanitizeString(data.name || 'User', 100);
+      data.email = sanitizeString(data.email || '', 150);
+
       try {
         const result = auth.registerUser(data);
         return sendJson(res, 201, {
@@ -187,15 +428,24 @@ async function handleRequest(req, res) {
           user: result.user,
           token: result.token,
           message: "Registration successful"
-        });
+        }, origin);
       } catch (err) {
-        return sendError(res, 400, err.message);
+        return sendError(res, 400, err.message, null, origin);
       }
     }
 
     // 3. Authentication: Login
     if (pathname === '/api/auth/login' && method === 'POST') {
+      const authLimit = checkRateLimit(req, 'auth_ops', 20, 5 * 60 * 1000);
+      if (!authLimit.allowed) {
+        return sendError(res, 429, 'Too many login attempts. Please wait 5 minutes.', null, origin, {
+          'Retry-After': String(authLimit.retryAfter)
+        });
+      }
+
       const data = await parseRequestBody(req);
+      data.email = sanitizeString(data.email || '', 150);
+
       try {
         const result = auth.loginUser(data);
         return sendJson(res, 200, {
@@ -203,9 +453,9 @@ async function handleRequest(req, res) {
           user: result.user,
           token: result.token,
           message: "Login successful"
-        });
+        }, origin);
       } catch (err) {
-        return sendError(res, 401, err.message);
+        return sendError(res, 401, err.message, null, origin);
       }
     }
 
@@ -216,67 +466,89 @@ async function handleRequest(req, res) {
         const token = authHeader.substring(7).trim();
         auth.logoutUser(token);
       }
-      return sendJson(res, 200, { success: true, message: "Logged out successfully" });
+      return sendJson(res, 200, { success: true, message: "Logged out successfully" }, origin);
     }
 
     // 5. Authentication: Current User
     if (pathname === '/api/auth/me' && method === 'GET') {
       const user = getAuthUser(req);
       if (!user) {
-        return sendJson(res, 200, { success: true, user: null, isGuest: true });
+        return sendJson(res, 200, { success: true, user: null, isGuest: true }, origin);
       }
-      return sendJson(res, 200, { success: true, user, isGuest: false });
+      return sendJson(res, 200, { success: true, user, isGuest: false }, origin);
     }
 
     // 6. Authentication: Update Profile
     if (pathname === '/api/auth/update-profile' && method === 'POST') {
       const user = getAuthUser(req);
-      if (!user) return sendError(res, 401, 'Unauthorized');
+      if (!user) return sendError(res, 401, 'Unauthorized', null, origin);
       const data = await parseRequestBody(req);
+      data.name = sanitizeString(data.name || '', 100);
       const updated = auth.updateProfile(user.id, data);
-      return sendJson(res, 200, { success: true, user: updated });
+      return sendJson(res, 200, { success: true, user: updated }, origin);
     }
 
     // 7. Authentication: Forgot Password
     if (pathname === '/api/auth/forgot-password' && method === 'POST') {
+      const authLimit = checkRateLimit(req, 'auth_ops', 20, 5 * 60 * 1000);
+      if (!authLimit.allowed) {
+        return sendError(res, 429, 'Too many password reset attempts. Please wait 5 minutes.', null, origin, {
+          'Retry-After': String(authLimit.retryAfter)
+        });
+      }
+
       const data = await parseRequestBody(req);
       try {
-        const result = auth.requestPasswordReset(data.email);
-        return sendJson(res, 200, result);
+        const result = auth.requestPasswordReset(sanitizeString(data.email, 150));
+        return sendJson(res, 200, result, origin);
       } catch (err) {
-        return sendError(res, 400, err.message);
+        return sendError(res, 400, err.message, null, origin);
       }
     }
 
     // 8. Authentication: Reset Password
     if (pathname === '/api/auth/reset-password' && method === 'POST') {
+      const authLimit = checkRateLimit(req, 'auth_ops', 20, 5 * 60 * 1000);
+      if (!authLimit.allowed) {
+        return sendError(res, 429, 'Too many attempts. Please wait 5 minutes.', null, origin, {
+          'Retry-After': String(authLimit.retryAfter)
+        });
+      }
+
       const data = await parseRequestBody(req);
       try {
         const result = auth.resetPassword(data);
-        return sendJson(res, 200, result);
+        return sendJson(res, 200, result, origin);
       } catch (err) {
-        return sendError(res, 400, err.message);
+        return sendError(res, 400, err.message, null, origin);
       }
     }
 
     // 9. Authentication: Delete Account
     if (pathname === '/api/auth/account' && method === 'DELETE') {
       const user = getAuthUser(req);
-      if (!user) return sendError(res, 401, 'Unauthorized');
+      if (!user) return sendError(res, 401, 'Unauthorized', null, origin);
       auth.deleteUserAccount(user.id);
-      return sendJson(res, 200, { success: true, message: "Account deleted successfully" });
+      return sendJson(res, 200, { success: true, message: "Account deleted successfully" }, origin);
     }
 
     // 10. PRIMARY ENDPOINT: Analyze Problem
     if (pathname === '/api/reports/analyze' && method === 'POST') {
+      const analysisLimit = checkRateLimit(req, 'ai_analysis', 40, 60 * 1000);
+      if (!analysisLimit.allowed) {
+        return sendError(res, 429, 'Too many analysis requests. Please wait a moment before trying again.', null, origin, {
+          'Retry-After': String(analysisLimit.retryAfter)
+        });
+      }
+
       const data = await parseRequestBody(req);
 
-      // MANDATORY WRITTEN DESCRIPTION CHECK
+      // MANDATORY WRITTEN DESCRIPTION CHECK & SANITIZATION
       // The written description is mandatory even when an image is provided.
       // A completed voice transcription may count as the written description.
-      const description = (data.description || '').trim();
+      const description = sanitizeString(data.description || '', 4000);
       if (!description || description.length < 3) {
-        return sendError(res, 400, 'A written description of the problem is mandatory (even when an image is provided).');
+        return sendError(res, 400, 'A written description of the problem is mandatory (even when an image is provided).', null, origin);
       }
 
       // Handle image if base64 provided
@@ -296,9 +568,9 @@ async function handleRequest(req, res) {
 
       const user = getAuthUser(req);
       const language = data.language || user?.preferred_language || 'en';
-      const location = data.location || '';
+      const location = sanitizeString(data.location || '', 200);
       const coordinates = data.coordinates || null;
-      const clarificationAnswer = data.clarificationAnswer || null;
+      const clarificationAnswer = data.clarificationAnswer ? sanitizeString(data.clarificationAnswer, 1000) : null;
 
       // Determine user age: from request payload, or logged-in profile, or null
       let userAge = null;
@@ -480,10 +752,17 @@ async function handleRequest(req, res) {
 
     // 11. Refine Analysis (Test 9 follow-up answers)
     if (pathname === '/api/reports/refine' && method === 'POST') {
+      const analysisLimit = checkRateLimit(req, 'ai_analysis', 40, 60 * 1000);
+      if (!analysisLimit.allowed) {
+        return sendError(res, 429, 'Too many analysis requests. Please wait a moment before trying again.', null, origin, {
+          'Retry-After': String(analysisLimit.retryAfter)
+        });
+      }
+
       const data = await parseRequestBody(req);
-      const description = data.description;
-      const clarificationAnswer = data.clarificationAnswer;
-      const location = data.location || '';
+      const description = sanitizeString(data.description || '', 4000);
+      const clarificationAnswer = sanitizeString(data.clarificationAnswer || '', 1000);
+      const location = sanitizeString(data.location || '', 200);
       const language = data.language || 'en';
       const user = getAuthUser(req);
       const userAge = data.age || user?.age || null;
@@ -570,6 +849,38 @@ async function handleRequest(req, res) {
           showTechnicians: Boolean(technicians && technicians.showTechnicians),
           showGovernment: Boolean(governmentAssistance)
         }
+      });
+    }
+
+    // 11b. Dynamic Age Verification for Tutorial Videos (No login required - equal features for all)
+    if (pathname === '/api/reports/verify-age' && method === 'POST') {
+      const data = await parseRequestBody(req);
+      const age = data.age !== undefined && data.age !== null ? parseInt(data.age) : null;
+      const query = data.query || data.tutorialSearchQuery || data.likelyIssue || 'repair tutorial';
+      const isSafeForDIY = data.isSafeForDIY !== false;
+      const technicalCategory = data.technicalCategory || 'General Diagnostics';
+      const preferredLanguage = data.language || 'en';
+      const troubleshootingSteps = data.troubleshootingSteps || [];
+      const likelyIssue = data.likelyIssue || null;
+      const affectedObject = data.affectedObject || null;
+      const safeChecks = data.safeChecks || [];
+
+      const tutorialVideos = await youtubeService.getTutorialVideos({
+        query,
+        userAge: age,
+        isSafeForDIY,
+        technicalCategory,
+        preferredLanguage,
+        troubleshootingSteps,
+        likelyIssue,
+        affectedObject,
+        safeChecks
+      });
+
+      return sendJson(res, 200, {
+        success: true,
+        tutorialVideos,
+        showVideos: Boolean(tutorialVideos && tutorialVideos.eligible && ((tutorialVideos.videos && tutorialVideos.videos.length > 0) || tutorialVideos.aiTutorialVideo))
       });
     }
 
@@ -719,24 +1030,33 @@ async function handleRequest(req, res) {
     }
 
     // =========================================================================
-    // STATIC FILE SERVING
+    // STATIC FILE SERVING & ASSET SECURITY
     // =========================================================================
 
-    // Serve Uploaded Images
+    // Serve Uploaded Images (Restricted to verified image types only)
     if (pathname.startsWith('/uploads/')) {
       const filename = path.basename(pathname);
       const filePath = path.join(UPLOADS_DIR, filename);
+      const ext = path.extname(filePath).toLowerCase();
+      const allowedImgExts = ['.jpg', '.jpeg', '.png', '.webp'];
+
+      if (!allowedImgExts.includes(ext)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
+        return res.end('Forbidden: Only standard image assets may be accessed.');
+      }
+
       if (fs.existsSync(filePath)) {
-        const ext = path.extname(filePath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'application/octet-stream';
         res.writeHead(200, {
           'Content-Type': contentType,
           'Cache-Control': 'public, max-age=86400',
-          'X-Content-Type-Options': 'nosniff'
+          'Content-Disposition': 'inline',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN'
         });
         return fs.createReadStream(filePath).pipe(res);
       } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.writeHead(404, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
         return res.end('Image not found');
       }
     }
@@ -746,38 +1066,47 @@ async function handleRequest(req, res) {
     let safePath = path.normalize(path.join(PUBLIC_DIR, requestedPath));
 
     if (!safePath.startsWith(PUBLIC_DIR)) {
-      res.writeHead(403, { 'Content-Type': 'text/plain' });
-      return res.end('Forbidden');
+      res.writeHead(403, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
+      return res.end('Forbidden: Directory traversal attempt blocked.');
     }
+
+    const secHeaders = getSecurityHeaders(true, origin);
 
     if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
       const ext = path.extname(safePath).toLowerCase();
       const contentType = MIME_TYPES[ext] || 'application/octet-stream';
       res.writeHead(200, {
         'Content-Type': contentType,
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        ...secHeaders
       });
       return fs.createReadStream(safePath).pipe(res);
     }
 
-    // SPA Fallback to index.html
-    const indexPath = path.join(PUBLIC_DIR, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff'
-      });
-      return fs.createReadStream(indexPath).pipe(res);
+    // SPA Fallback: Only route client navigations WITHOUT a file extension to index.html
+    const hasFileExt = path.extname(safePath).length > 0;
+    if (!hasFileExt) {
+      const indexPath = path.join(PUBLIC_DIR, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          ...secHeaders
+        });
+        return fs.createReadStream(indexPath).pipe(res);
+      }
     }
 
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.writeHead(404, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
     res.end('Not Found');
 
   } catch (serverErr) {
     console.error('Server error:', serverErr);
-    return sendError(res, 500, 'Internal Server Error', serverErr.message);
+    return sendError(res, 500, 'Internal Server Error', serverErr.message, origin);
   }
 }
 
