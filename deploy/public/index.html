@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>See &amp; Solve — AI Visual Problem Diagnostics &amp; Resolution</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css?v=2.2">
 </head>
 <body>
 
@@ -44,6 +44,7 @@
       </nav>
 
       <div class="header-actions">
+        <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Dark/Light Mode">🌓</button>
         <select id="global-lang-select" class="lang-select" aria-label="Language">
           <option value="en">English</option>
           <option value="te">తెలుగు</option>
@@ -66,22 +67,22 @@
       <div class="form-card">
         <div class="form-header">
           <div class="header-badge-row">
-            <span class="pill-badge pill-ai">✨ AI-Powered Diagnostics</span>
-            <span class="pill-badge pill-region">📍 Andhra Pradesh, India</span>
+            <span class="pill-badge pill-ai">✨ AI Vision Intelligence</span>
+            <span class="pill-badge pill-region">📍 Andhra Pradesh</span>
           </div>
           <h1 data-i18n="submitTitle">Report a Real-World Problem</h1>
-          <p data-i18n="submitSubtitle">Snap or upload a photo, describe what happened, and receive instant AI diagnosis, safe troubleshooting, animated AI video tutorials, local technicians, or government grievance assistance.</p>
+          <p data-i18n="submitSubtitle">Upload a photo and description to receive instant AI diagnostics, safe DIY steps, video guides, and verified help.</p>
         </div>
 
         <!-- Quick Sample Presets -->
         <div class="presets-container">
-          <span class="presets-label">⚡ Try a Sample Problem:</span>
+          <span class="presets-label">⚡ Quick Samples:</span>
           <div class="presets-row">
             <button type="button" class="preset-btn" data-desc="Kitchen sink is blocked and wastewater is overflowing into the basin" data-loc="Brodipet, Guntur" data-cat="plumbing">🚰 Blocked Sink</button>
-            <button type="button" class="preset-btn" data-desc="Laptop cannot connect to Wi-Fi, network adapter is missing in Windows device manager" data-loc="Governorpet, Vijayawada" data-cat="laptop">💻 Laptop Wi-Fi Broken</button>
-            <button type="button" class="preset-btn" data-desc="Washing machine drum will not drain water after cycle, error code 5E shown" data-loc="Arundelpet, Guntur" data-cat="washer">🧺 Washer Not Draining</button>
-            <button type="button" class="preset-btn" data-desc="Deep hazardous pothole on public arterial road causing traffic congestion and two-wheeler falls" data-loc="Main Road, Guntur" data-cat="pothole">🚧 Road Pothole (Civic)</button>
-            <button type="button" class="preset-btn" data-desc="Damaged public drinking water supply pipeline gushing water onto municipal roadway" data-loc="Dwaraka Nagar, Visakhapatnam" data-cat="pipe">💧 Public Pipeline Leak</button>
+            <button type="button" class="preset-btn" data-desc="Laptop cannot connect to Wi-Fi, network adapter is missing in Windows device manager" data-loc="Governorpet, Vijayawada" data-cat="laptop">💻 Laptop Wi-Fi</button>
+            <button type="button" class="preset-btn" data-desc="Washing machine drum will not drain water after cycle, error code 5E shown" data-loc="Arundelpet, Guntur" data-cat="washer">🧺 Washer Drain</button>
+            <button type="button" class="preset-btn" data-desc="Deep hazardous pothole on public arterial road causing traffic congestion and two-wheeler falls" data-loc="Main Road, Guntur" data-cat="pothole">🚧 Road Pothole</button>
+            <button type="button" class="preset-btn" data-desc="Damaged public drinking water supply pipeline gushing water onto municipal roadway" data-loc="Dwaraka Nagar, Visakhapatnam" data-cat="pipe">💧 Pipe Leak</button>
           </div>
         </div>
 
@@ -95,18 +96,18 @@
             <!-- Dual Capture / Upload Buttons -->
             <div class="photo-actions-bar">
               <button type="button" id="btn-open-camera-modal" class="btn-photo-action btn-camera">
-                <span>📷</span> <span>Open Live Camera</span>
+                <span>📷</span> <span>Live Camera</span>
               </button>
               <button type="button" id="btn-browse-file" class="btn-photo-action btn-browse">
-                <span>📁</span> <span>Upload from Device</span>
+                <span>📁</span> <span>Choose File</span>
               </button>
             </div>
 
             <!-- Upload Dropzone -->
             <div id="upload-dropzone" class="upload-dropzone">
               <div class="dropzone-icon">📸</div>
-              <div class="dropzone-text" data-i18n="photoPrompt">Click above or drag &amp; drop a photo here</div>
-              <div class="dropzone-hint">Supports JPEG, PNG, WebP • Take photo with phone/webcam or choose file</div>
+              <div class="dropzone-text" data-i18n="photoPrompt">Drop photo here or choose an option above</div>
+              <div class="dropzone-hint">JPEG, PNG, WebP</div>
             </div>
 
             <!-- Image Preview Box -->
@@ -122,33 +123,32 @@
           <!-- Problem Description (Mandatory) -->
           <div class="form-group">
             <label class="form-label" for="problem-description" data-i18n="descLabel">Problem Description <span class="req">*</span></label>
-            <textarea id="problem-description" class="form-textarea" rows="3" required
-              data-i18n-placeholder="descPlaceholder"
-              placeholder="Describe the issue in detail (e.g., 'Kitchen sink is blocked and water will not drain' or 'Deep pothole on main road causing accidents')..."></textarea>
-            
-            <div class="desc-actions-row">
-              <button type="button" id="btn-voice-input" class="voice-btn" data-i18n="voiceButton">
-                <span class="mic-icon">🎤</span> <span id="voice-btn-text">Voice Input</span>
+            <div class="textarea-wrapper">
+              <textarea id="problem-description" class="form-textarea" rows="3" required
+                data-i18n-placeholder="descPlaceholder"
+                placeholder="Describe what happened or needs fixing (e.g. 'Sink blocked and overflowing')..."></textarea>
+              <button type="button" id="btn-voice-input" class="voice-btn-mic" title="Voice Input (Click to speak)" aria-label="Voice Input">
+                <span class="mic-glyph">🎤</span>
+                <span id="voice-btn-text" style="display:none;">Voice Input</span>
               </button>
-              <span class="desc-counter-hint">Mandatory description • Voice input supported</span>
             </div>
           </div>
 
           <!-- Location Input & Quick City Selector -->
           <div class="form-group">
-            <label class="form-label" for="location-input" data-i18n="locationLabel">Location (City, Locality, or District)</label>
+            <label class="form-label" for="location-input" data-i18n="locationLabel">Location (City or Locality)</label>
             <div class="input-with-action">
               <input type="text" id="location-input" class="form-input" 
                 data-i18n-placeholder="locationPlaceholder"
                 placeholder="e.g., Brodipet, Guntur or Vijayawada">
               <button type="button" id="btn-detect-location" class="action-btn-secondary" data-i18n="detectLocation">
-                <span>📍</span> Use GPS Location
+                <span>📍</span> GPS
               </button>
             </div>
 
             <!-- Quick City Badges -->
             <div class="city-chips-container">
-              <span class="chips-title">Quick Select City:</span>
+              <span class="chips-title">Quick Cities:</span>
               <div class="chips-list">
                 <button type="button" class="city-chip" data-city="Guntur" data-lat="16.3067" data-lng="80.4365">Guntur</button>
                 <button type="button" class="city-chip" data-city="Vijayawada" data-lat="16.5062" data-lng="80.6480">Vijayawada</button>
@@ -158,23 +158,49 @@
                 <button type="button" class="city-chip" data-city="Kakinada" data-lat="16.9891" data-lng="82.2475">Kakinada</button>
                 <button type="button" class="city-chip" data-city="Nellore" data-lat="14.4426" data-lng="79.9865">Nellore</button>
                 <button type="button" class="city-chip" data-city="Kurnool" data-lat="15.8281" data-lng="78.0373">Kurnool</button>
-                <button type="button" class="city-chip" data-city="Kadapa" data-lat="14.4674" data-lng="78.8241">Kadapa</button>
-                <button type="button" class="city-chip" data-city="Anantapur" data-lat="14.6819" data-lng="77.6006">Anantapur</button>
-                <button type="button" class="city-chip" data-city="Eluru" data-lat="16.7107" data-lng="81.0952">Eluru</button>
-                <button type="button" class="city-chip" data-city="Ongole" data-lat="15.5057" data-lng="80.0499">Ongole</button>
               </div>
             </div>
           </div>
 
-          <!-- Age Selection (Compliance) -->
-          <div class="form-group">
-            <label class="form-label" for="user-age-select" data-i18n="ageLabel">Your Age (Required for tutorial video safety compliance)</label>
-            <select id="user-age-select" class="form-select">
+          <!-- Age Verification (Required for Safety Compliance & AI Videos) -->
+          <div class="form-group age-verification-card">
+            <div class="age-card-header">
+              <label class="form-label" style="margin-bottom:0;">
+                <span data-i18n="ageLabel">Age Verification</span> <span class="req">*</span>
+              </label>
+              <span class="pill-badge pill-free">🔓 Open for all users</span>
+            </div>
+
+            <!-- Hidden select kept in sync for accessibility & tests -->
+            <select id="user-age-select" class="form-select" style="display:none;">
               <option value="18" selected data-i18n="ageOption18Plus">18 years or older (Eligible for video tutorials)</option>
               <option value="15" data-i18n="ageOptionUnder18">Under 18 (Tutorial videos withheld for safety)</option>
-              <option value="" data-i18n="ageOptionUnknown">Prefer not to disclose / Unverified</option>
             </select>
-            <p class="field-hint">Users under 18 receive safe text guidance, while DIY video tutorials are safely withheld.</p>
+
+            <!-- Interactive Radio Cards -->
+            <div class="age-choice-grid">
+              <label class="age-choice-card selected" id="age-choice-18">
+                <input type="radio" name="age-option" value="18" checked>
+                <div class="age-choice-body">
+                  <div class="age-choice-top">
+                    <span class="age-choice-emoji">🔞</span>
+                    <span class="age-choice-title">18+ Years</span>
+                  </div>
+                  <p class="age-choice-desc">AI animated videos &amp; DIY repair tutorials</p>
+                </div>
+              </label>
+
+              <label class="age-choice-card" id="age-choice-minor">
+                <input type="radio" name="age-option" value="15">
+                <div class="age-choice-body">
+                  <div class="age-choice-top">
+                    <span class="age-choice-emoji">🛡️</span>
+                    <span class="age-choice-title">Under 18</span>
+                  </div>
+                  <p class="age-choice-desc">Safe text checklist &amp; technician referrals</p>
+                </div>
+              </label>
+            </div>
           </div>
 
           <!-- Error Alert -->
@@ -189,6 +215,17 @@
 
       <!-- ========== RESULTS CONTAINER ========== -->
       <div id="results-container" class="results-container">
+
+        <!-- Solution Navigation Filter Bar -->
+        <div id="results-quick-nav" class="results-quick-nav" style="display:none;">
+          <div class="quick-nav-track">
+            <button type="button" class="qnav-btn active" data-target="diag-section"><span>🔬</span> <span>AI Vision</span></button>
+            <button type="button" class="qnav-btn" id="qnav-trouble" data-target="trouble-section"><span>🛠️</span> <span>Checklist</span></button>
+            <button type="button" class="qnav-btn" id="qnav-video" data-target="video-section"><span>🎥</span> <span>AI Videos</span></button>
+            <button type="button" class="qnav-btn" id="qnav-tech" data-target="tech-section"><span>🔧</span> <span>Technicians</span></button>
+            <button type="button" class="qnav-btn" id="qnav-gov" data-target="gov-section"><span>🏛️</span> <span>Gov Grievance</span></button>
+          </div>
+        </div>
 
         <!-- Clarification Box -->
         <div id="clarification-section" class="clarification-box" style="display:none;">
@@ -559,9 +596,32 @@
   <!-- ===================== TOAST NOTIFICATION ===================== -->
   <div id="toast-msg" class="toast-msg"></div>
 
+  <!-- ===================== FLOATING SCROLL-TO-TOP BUTTON ===================== -->
+  <button type="button" id="btn-scroll-top" class="floating-scroll-top" title="Scroll to top" aria-label="Scroll to top">↑</button>
+
+  <!-- ===================== MOBILE BOTTOM NAVIGATION ===================== -->
+  <nav class="mobile-bottom-nav">
+    <button type="button" class="m-nav-item active" data-tab="report">
+      <span class="m-nav-icon">📝</span>
+      <span class="m-nav-text" data-i18n="navReport">Report</span>
+    </button>
+    <button type="button" class="m-nav-item" id="m-nav-solutions" style="display:none;">
+      <span class="m-nav-icon">💡</span>
+      <span class="m-nav-text">Solutions</span>
+    </button>
+    <button type="button" class="m-nav-item" data-tab="reports">
+      <span class="m-nav-icon">📂</span>
+      <span class="m-nav-text" data-i18n="navMyReports">History</span>
+    </button>
+    <button type="button" class="m-nav-item" data-tab="profile">
+      <span class="m-nav-icon">👤</span>
+      <span class="m-nav-text" data-i18n="navProfile">Profile</span>
+    </button>
+  </nav>
+
   <!-- ===================== SCRIPTS ===================== -->
-  <script src="/js/i18n-client.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="/js/i18n-client.js?v=2.2"></script>
+  <script src="/js/app.js?v=2.2"></script>
 
 </body>
 </html>
