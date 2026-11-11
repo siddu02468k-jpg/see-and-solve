@@ -34,8 +34,8 @@ fs.mkdirSync(dataDest, { recursive: true });
 fs.copyFileSync(path.join(root, 'data', 'gov_services.json'), path.join(dataDest, 'gov_services.json'));
 fs.copyFileSync(path.join(root, 'data', 'technicians.json'), path.join(dataDest, 'technicians.json'));
 
-// 4. Copy config files
-['package.json', 'Dockerfile', 'docker-compose.yml', 'render.yaml', 'README.md'].forEach(file => {
+// 4. Copy config and security files (Strictly excluding .env and .db files)
+['package.json', 'Dockerfile', 'docker-compose.yml', 'render.yaml', 'README.md', '.gitignore', '.env.example'].forEach(file => {
   const filePath = path.join(root, file);
   if (fs.existsSync(filePath)) {
     fs.copyFileSync(filePath, path.join(deployDir, file));

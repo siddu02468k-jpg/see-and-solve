@@ -13,6 +13,7 @@ const db = new DatabaseSync(DB_PATH);
 // Initialize schema
 db.exec(`
   PRAGMA journal_mode = WAL;
+  PRAGMA foreign_keys = ON;
 
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
@@ -22,6 +23,7 @@ db.exec(`
     name TEXT,
     age INTEGER,
     preferred_language TEXT DEFAULT 'en',
+    is_admin INTEGER DEFAULT 0,
     created_at TEXT NOT NULL
   );
 
@@ -60,6 +62,13 @@ db.exec(`
     used INTEGER DEFAULT 0
   );
 `);
+
+// Migration for existing tables: add is_admin if not present
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0;`);
+} catch (e) {
+  // Column already present
+}
 
 module.exports = {
   db,

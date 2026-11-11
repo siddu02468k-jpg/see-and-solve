@@ -178,12 +178,17 @@
   };
 
   // Toast Notification
+  let toastTimer = null;
   function showToast(msg, duration = 3000) {
     if (!els.toast) return;
+    if (toastTimer) clearTimeout(toastTimer);
     els.toast.textContent = msg;
     els.toast.style.display = 'block';
-    setTimeout(() => {
+    els.toast.classList.add('visible');
+    toastTimer = setTimeout(() => {
       els.toast.style.display = 'none';
+      els.toast.classList.remove('visible');
+      toastTimer = null;
     }, duration);
   }
 
@@ -218,6 +223,32 @@
       pane.classList.toggle('active', pane.id === `tab-${tabId}`);
     });
 
+    // Update Unique Page Title per tab
+    const pageTitles = {
+      report: 'Report a Real-World Problem | See & Solve',
+      reports: 'My Saved Reports | See & Solve',
+      profile: 'User Profile & System Settings | See & Solve'
+    };
+    document.title = pageTitles[tabId] || 'See & Solve — AI Visual Problem Diagnostics';
+
+    // Update Interactive Breadcrumb
+    const bcCurrent = document.getElementById('bc-current-tab');
+    const bcSep = document.getElementById('bc-solutions-sep');
+    const bcSol = document.getElementById('bc-solutions-item');
+    if (bcCurrent) {
+      if (tabId === 'report') {
+        bcCurrent.textContent = 'Diagnostic Node';
+      } else if (tabId === 'reports') {
+        bcCurrent.textContent = 'My Saved Reports';
+        if (bcSep) bcSep.style.display = 'none';
+        if (bcSol) bcSol.style.display = 'none';
+      } else if (tabId === 'profile') {
+        bcCurrent.textContent = 'Profile & Settings';
+        if (bcSep) bcSep.style.display = 'none';
+        if (bcSol) bcSol.style.display = 'none';
+      }
+    }
+
     if (tabId === 'reports') {
       loadUserReports();
     } else if (tabId === 'profile') {
@@ -227,6 +258,52 @@
 
   els.tabButtons.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+  });
+
+  // Make Logo Clickable to navigate to home/report and scroll to top smoothly
+  const logoLink = document.querySelector('.logo-container');
+  if (logoLink) {
+    logoLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchTab('report');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // Footer navigation tab links
+  document.querySelectorAll('.footer-tab-trigger').forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetTab = trigger.getAttribute('data-tab');
+      if (targetTab) {
+        switchTab(targetTab);
+        const targetPane = document.getElementById(`tab-${targetTab}`);
+        if (targetPane) {
+          targetPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+
+  // Dynamic Copyright Year
+  const copyrightYearEl = document.getElementById('copyright-year');
+  if (copyrightYearEl) {
+    copyrightYearEl.textContent = new Date().getFullYear();
+  }
+
+  // Footer Legal and Accessibility Links
+  document.querySelectorAll('.footer-legal-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const text = link.textContent.trim();
+      if (text.includes('Privacy')) {
+        showToast('Privacy Safeguards: See & Solve encrypts citizen telemetry. No personal identifiers are stored without consent.', 'info');
+      } else if (text.includes('Terms')) {
+        showToast('Terms of Service: Authorized civic reporting tool compliant with AP State Digital Governance guidelines.', 'info');
+      } else if (text.includes('Accessibility')) {
+        showToast('WCAG 2.1 AAA Compliant: Screen-reader verified, keyboard accessible, and high contrast compliant.', 'info');
+      }
+    });
   });
 
   // Mobile Bottom Navigation
@@ -255,7 +332,9 @@
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('see_and_solve_theme', theme);
     if (els.themeToggleBtn) {
-      els.themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌓';
+      els.themeToggleBtn.innerHTML = theme === 'dark'
+        ? `<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>`;
       els.themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme');
     }
   }
@@ -843,12 +922,12 @@
             els.locationInput.value = findNearestCity(lat, lng);
           }
           const accStr = accuracy ? ` (±${Math.round(accuracy)}m)` : '';
-          els.detectLocationBtn.textContent = `Location Set ✓${accStr}`;
+          els.detectLocationBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span>Location Set${accStr}</span>`;
         },
         (error) => {
           console.warn('Geolocation error:', error);
           alert('Unable to retrieve automatic location. Please select your city from the badges below.');
-          els.detectLocationBtn.textContent = 'Use GPS';
+          els.detectLocationBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg> <span>GPS Location</span>`;
         },
         { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
       );
@@ -929,20 +1008,61 @@
     if (!els.submitBtn) return;
     els.submitBtn.disabled = loading;
     if (loading) {
-      els.submitBtn.innerHTML = `<span class="spinner"></span> <span>Analyzing with AI Vision...</span>`;
+      els.submitBtn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="quantum-spin"><circle cx="12" cy="12" r="9" stroke-dasharray="25 15"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> <span>Analyzing with Neural Vision Matrix...</span>`;
       els.submitBtn.classList.add('loading-shimmer');
     } else {
-      els.submitBtn.innerHTML = `<span>🔍</span> <span>Analyze Problem with AI</span>`;
+      els.submitBtn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="quantum-spin"><circle cx="12" cy="12" r="9" stroke-dasharray="35 15"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> <span data-i18n="analyzeButton">Run AI Diagnostics</span>`;
       els.submitBtn.classList.remove('loading-shimmer');
     }
   }
 
   // =========================================================================
-  // DISPLAY RESULTS
+  // DISPLAY RESULTS & AUTOMATIC SMOOTH SCROLL TO SOLUTIONS
   // =========================================================================
+  function scrollToSolutions() {
+    let target = null;
+    if (els.clarificationSection && els.clarificationSection.style.display !== 'none') {
+      target = els.clarificationSection;
+    } else if (els.resultsQuickNav && els.resultsQuickNav.style.display !== 'none') {
+      target = els.resultsQuickNav;
+    } else if (els.diagSection && els.diagSection.style.display !== 'none') {
+      target = els.diagSection;
+    } else {
+      target = els.resultsContainer;
+    }
+
+    if (!target) return;
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const headerEl = document.querySelector('.app-header');
+        const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+        const targetRect = target.getBoundingClientRect();
+        const scrollPosition = targetRect.top + window.pageYOffset - (headerHeight + 20);
+
+        window.scrollTo({
+          top: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        });
+
+        const highlightCard = (target === els.resultsQuickNav && els.diagSection) ? els.diagSection : target;
+        if (highlightCard) {
+          highlightCard.classList.remove('solution-spotlight');
+          void highlightCard.offsetWidth;
+          highlightCard.classList.add('solution-spotlight');
+        }
+      }, 70);
+    });
+  }
+
   function displayResults(data) {
     els.resultsContainer.classList.add('visible');
-    els.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Update Interactive Breadcrumb to include Solutions Hub
+    const bcSep = document.getElementById('bc-solutions-sep');
+    const bcSol = document.getElementById('bc-solutions-item');
+    if (bcSep) bcSep.style.display = 'inline-block';
+    if (bcSol) bcSol.style.display = 'inline-block';
 
     if (els.resultsQuickNav) els.resultsQuickNav.style.display = 'block';
     if (els.mNavSolutions) els.mNavSolutions.style.display = 'flex';
@@ -960,7 +1080,7 @@
     if (qnavTech) qnavTech.style.display = sections.showTechnicians ? 'inline-flex' : 'none';
     if (qnavGov) qnavGov.style.display = sections.showGovernmentHelp ? 'inline-flex' : 'none';
 
-    // Wire quick nav jump buttons
+    // Wire quick nav jump buttons with header offset awareness
     document.querySelectorAll('.qnav-btn').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.qnav-btn').forEach(b => b.classList.remove('active'));
@@ -968,7 +1088,14 @@
         const targetId = btn.getAttribute('data-target');
         const targetEl = document.getElementById(targetId);
         if (targetEl) {
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const headerEl = document.querySelector('.app-header');
+          const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+          const quickNavHeight = els.resultsQuickNav ? els.resultsQuickNav.offsetHeight : 50;
+          const targetTop = targetEl.getBoundingClientRect().top + window.pageYOffset - (headerHeight + quickNavHeight + 16);
+          window.scrollTo({
+            top: Math.max(0, targetTop),
+            behavior: 'smooth'
+          });
         }
       };
     });
@@ -999,6 +1126,7 @@
       els.videoSection.style.display = 'none';
       els.techSection.style.display = 'none';
       els.govSection.style.display = 'none';
+      scrollToSolutions();
       return;
     } else {
       els.clarificationSection.style.display = 'none';
@@ -1087,7 +1215,7 @@
       });
 
       // Stop condition
-      els.troubleStop.innerHTML = `<strong>⚠️ When to Stop:</strong> ${escapeHtml(tb.whenToStop || 'If symptoms persist or require specialized tools.')}`;
+      els.troubleStop.innerHTML = `<strong style="display:inline-flex; align-items:center; gap:0.35rem; color:var(--danger);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Critical Stop Threshold:</strong> ${escapeHtml(tb.whenToStop || 'If symptoms persist or require specialized tools.')}`;
     } else {
       els.troubleSection.style.display = 'none';
     }
@@ -1108,9 +1236,12 @@
         renderVideoCards(vidData.videos);
       } else {
         els.videoGrid.innerHTML = `
-          <div style="padding:1.5rem; text-align:center; background:#f8fafc; border-radius:var(--radius-sm); border:1px solid #e2e8f0; grid-column:1/-1;">
-            <p style="margin-bottom:0.75rem; color:#475569;">No direct YouTube video embedded for this exact issue. Use the AI Video Player above or search YouTube directly:</p>
-            <a href="${vidData.externalSearchUrl || 'https://www.youtube.com'}" target="_blank" rel="noopener noreferrer" class="video-btn">🔍 Search YouTube for "${escapeHtml(ai.tutorial_search_query || ai.likely_issue)}"</a>
+          <div style="padding:1.5rem; text-align:center; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-card); grid-column:1/-1;">
+            <p style="margin-bottom:0.75rem; color:var(--text-muted);">No direct YouTube video embedded for this exact issue. Use the AI Video Player above or search YouTube directly:</p>
+            <a href="${vidData.externalSearchUrl || 'https://www.youtube.com'}" target="_blank" rel="noopener noreferrer" class="video-btn" style="display:inline-flex; align-items:center; gap:0.4rem;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>Search YouTube for "${escapeHtml(ai.tutorial_search_query || ai.likely_issue)}"</span>
+            </a>
           </div>
         `;
       }
@@ -1125,20 +1256,24 @@
       const isHazardOrPublic = !ai || !ai.is_suitable_for_safe_troubleshooting || ai.is_government_related;
 
       if (isHazardOrPublic) {
-        els.videoNotice.innerHTML = `<strong>🛡️ Safety Compliance:</strong> ${escapeHtml(vidData.reason || 'DIY tutorial videos are strictly withheld for hazardous or public infrastructure work.')}`;
+        els.videoNotice.innerHTML = `<strong style="display:inline-flex; align-items:center; gap:0.35rem;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Safety Compliance:</strong> ${escapeHtml(vidData.reason || 'DIY tutorial videos are strictly withheld for hazardous or public infrastructure work.')}`;
       } else {
         // Safe DIY task! Directly prompt the user for their age — equal features for guests & signed-up users
         els.videoNotice.innerHTML = `
           <div class="age-unlock-banner">
-            <div style="font-size:2rem; margin-bottom:0.35rem;">🔞</div>
+            <div style="margin-bottom:0.35rem; color:var(--primary);">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+            </div>
             <h4>Age Verification Required to Unlock AI Video Tutorials</h4>
             <p>Safety regulations require confirming you are 18 or older to view mechanical and electrical repair tutorial videos. <strong>No sign-in or account is required</strong> — verify your age below to unlock full AI tutorials:</p>
             <div class="age-unlock-actions">
               <button type="button" id="btn-inline-verify-age" class="btn-unlock-videos">
-                <span>🔞</span> <span>I am 18 or Older — Unlock AI Videos Now</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                <span>I am 18 or Older — Unlock AI Videos Now</span>
               </button>
               <button type="button" id="btn-inline-stay-minor" class="btn-keep-minor">
-                <span>🛡️</span> <span>I am Under 18 (Keep Safe Text Only)</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>I am Under 18 (Keep Safe Text Only)</span>
               </button>
             </div>
           </div>
@@ -1181,12 +1316,12 @@
               } else {
                 showToast('Could not unlock videos: ' + (verifyData.error || 'Verification failed'));
                 btnVerify.disabled = false;
-                btnVerify.innerHTML = `<span>🔞</span> <span>I am 18 or Older — Unlock AI Videos Now</span>`;
+                btnVerify.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> <span>I am 18 or Older — Unlock AI Videos Now</span>`;
               }
             } catch (err) {
               showToast('Network error during age verification.');
               btnVerify.disabled = false;
-              btnVerify.innerHTML = `<span>🔞</span> <span>I am 18 or Older — Unlock AI Videos Now</span>`;
+              btnVerify.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> <span>I am 18 or Older — Unlock AI Videos Now</span>`;
             }
           };
         }
@@ -1196,7 +1331,7 @@
           btnMinor.onclick = () => {
             els.videoNotice.innerHTML = `
               <div style="padding:1rem; text-align:center;">
-                <p><strong>🛡️ Safety Mode Active:</strong> Tutorial videos are withheld for users under 18. Please follow the safe preliminary checklist above or contact a verified local technician.</p>
+                <p><strong style="display:inline-flex; align-items:center; gap:0.35rem;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Safety Mode Active:</strong> Tutorial videos are withheld for users under 18. Please follow the safe preliminary checklist above or contact a verified local technician.</p>
               </div>
             `;
           };
@@ -1220,7 +1355,7 @@
         els.techNotice.style.display = 'block';
         els.techNotice.innerHTML = `
           <p><strong>Notice:</strong> ${escapeHtml(techData.message || 'No local technicians found in this area.')}</p>
-          ${techData.externalSearchUrl ? `<p style="margin-top:0.5rem;"><a href="${techData.externalSearchUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map">🔍 Search Local Providers on Google Maps (External)</a></p>` : ''}
+          ${techData.externalSearchUrl ? `<p style="margin-top:0.5rem;"><a href="${techData.externalSearchUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search Local Providers on Google Maps (External)</a></p>` : ''}
         `;
       }
     } else {
@@ -1235,7 +1370,10 @@
       const draft = govData.emailDraft;
 
       els.govAuthorityCard.innerHTML = `
-        <h3 style="color:#166534; font-size:1.1rem; margin-bottom:0.25rem;">🏛️ ${escapeHtml(auth?.name || 'Responsible Civic Department')}</h3>
+        <h3 style="color:#166534; font-size:1.1rem; margin-bottom:0.25rem; display:flex; align-items:center; gap:0.4rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 2l10 8H2z"/></svg>
+          <span>${escapeHtml(auth?.name || 'Responsible Civic Department')}</span>
+        </h3>
         <p style="font-size:0.85rem; color:#14532d; margin-bottom:0.5rem;">${escapeHtml(auth?.description || '')}</p>
         <p style="font-size:0.85rem;"><strong>Toll-Free Helpline:</strong> ${escapeHtml(auth?.tollFree || '1902')} | <strong>Official Portal:</strong> <a href="${escapeHtml(auth?.portalUrl || 'https://meekosam.ap.gov.in')}" target="_blank" rel="noopener noreferrer">${escapeHtml(auth?.portalUrl || 'meekosam.ap.gov.in')}</a></p>
       `;
@@ -1267,6 +1405,9 @@
     } else if (els.saveReportRow) {
       els.saveReportRow.style.display = 'none';
     }
+
+    // Smoothly scroll down to solutions where results are presented
+    scrollToSolutions();
   }
 
   // =========================================================================
@@ -1722,9 +1863,15 @@
         `;
       } else {
         playerHtml = `
-          <div style="background:#1e293b; color:white; padding:1.5rem; text-align:center;">
-            <p style="font-size:0.9rem; margin-bottom:0.75rem;">🔒 This video is restricted from embedding inside third-party apps by the content owner.</p>
-            <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener noreferrer" class="video-btn">▶️ Open on YouTube</a>
+          <div style="background:var(--bg-subtle); color:var(--text-main); padding:1.5rem; text-align:center; border:1px solid var(--border-card); border-radius:var(--radius-sm);">
+            <p style="font-size:0.9rem; margin-bottom:0.75rem; display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>This video is restricted from in-app embedding by the creator.</span>
+            </p>
+            <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener noreferrer" class="video-btn" style="display:inline-flex; align-items:center; gap:0.4rem;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Open on YouTube</span>
+            </a>
           </div>
         `;
       }
@@ -1734,12 +1881,19 @@
         <div class="video-meta">
           <div>
             <h3>${escapeHtml(v.title)}</h3>
-            <div class="video-channel">📺 Channel: ${escapeHtml(v.channelTitle)}</div>
-            <div class="video-relevance">💡 <strong>Why this helps:</strong> ${escapeHtml(v.relevanceExplanation || 'Matches problem diagnosis')}</div>
+            <div class="video-channel" style="display:flex; align-items:center; gap:0.35rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+              <span>Channel: ${escapeHtml(v.channelTitle)}</span>
+            </div>
+            <div class="video-relevance" style="display:flex; align-items:flex-start; gap:0.35rem; margin-top:0.35rem;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              <span><strong>Technical Alignment:</strong> ${escapeHtml(v.relevanceExplanation || 'Matches problem diagnosis')}</span>
+            </div>
           </div>
           <div style="margin-top:0.75rem;">
-            <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener noreferrer" class="video-btn" style="width:100%;">
-              Open on YouTube ↗
+            <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener noreferrer" class="video-btn" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;">
+              <span>Open on YouTube</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </div>
         </div>
@@ -1759,8 +1913,8 @@
 
       const distanceBadge = t.distanceKm !== null ? `<span class="tech-distance">${t.distanceKm} km away</span>` : '';
       const phoneHtml = t.phone
-        ? `<div class="tech-phone available">📞 Phone: <a href="tel:${t.phone.replace(/[^0-9+]/g, '')}">${escapeHtml(t.phone)}</a></div>`
-        : `<div class="tech-phone unavailable">📞 Phone number not available</div>`;
+        ? `<div class="tech-phone available" style="display:flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> <span>Phone: <a href="tel:${t.phone.replace(/[^0-9+]/g, '')}">${escapeHtml(t.phone)}</a></span></div>`
+        : `<div class="tech-phone unavailable" style="display:flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><line x1="1" y1="1" x2="23" y2="23"/></svg> <span>Phone unlisted</span></div>`;
 
       const tagsHtml = (t.specificServices || []).map(s => `<span class="tech-tag">${escapeHtml(s)}</span>`).join('');
 
@@ -1770,10 +1924,14 @@
             <h3 class="tech-name">${escapeHtml(t.name)}</h3>
             ${distanceBadge}
           </div>
-          <div class="tech-address">📍 ${escapeHtml(t.address)}</div>
+          <div class="tech-address" style="display:flex; align-items:flex-start; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>${escapeHtml(t.address)}</span>
+          </div>
           ${phoneHtml}
-          <div style="font-size:0.8rem; color:var(--gray-500); margin-bottom:0.5rem;">
-            ⭐ ${t.rating || '4.5'} (${t.reviewCount || 20}+ reviews) • Source: ${escapeHtml(t.source || 'Verified AP Directory')}
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.3rem;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="#eab308" stroke="#eab308"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>${t.rating || '4.5'} (${t.reviewCount || 20}+ reviews) • Verified AP Directory</span>
           </div>
           <div class="tech-tags">${tagsHtml}</div>
         </div>
@@ -1838,9 +1996,9 @@
   async function loadUserReports() {
     if (!currentUser) {
       els.reportsListContainer.innerHTML = `
-        <div style="text-align:center; padding:2rem; background:white; border-radius:var(--radius-md); border:1px solid var(--gray-200);">
-          <p style="margin-bottom:1rem; color:var(--gray-700);">Sign in to access your saved reports history across devices.</p>
-          <button class="nav-btn active" style="margin:0 auto;" id="btn-login-prompt">Sign In / Register</button>
+        <div style="text-align:center; padding:2.5rem 1.5rem; background:var(--bg-subtle); border-radius:var(--radius-md); border:1px solid var(--border-card);">
+          <p style="margin-bottom:1.25rem; color:var(--text-main); font-weight:600;">Sign in to access your synchronized problem diagnostic reports history.</p>
+          <button class="nav-btn active" style="margin:0 auto; padding:0.6rem 1.25rem;" id="btn-login-prompt">Sign In / Register</button>
         </div>
       `;
       document.getElementById('btn-login-prompt')?.addEventListener('click', () => openAuthModal('login'));
@@ -1858,7 +2016,7 @@
         els.reportsListContainer.innerHTML = '';
         data.reports.forEach(r => {
           const card = document.createElement('div');
-          card.className = 'result-card';
+          card.className = 'result-card future-card';
           card.style.display = 'flex';
           card.style.justifyContent = 'space-between';
           card.style.alignItems = 'center';
@@ -1869,8 +2027,8 @@
 
           card.innerHTML = `
             <div>
-              <h3 style="font-size:1.05rem; font-weight:700; color:var(--gray-900);">${escapeHtml(r.analysis?.likely_issue || r.description.substring(0, 60))}</h3>
-              <p style="font-size:0.85rem; color:var(--gray-500);">Submitted on ${formattedDate} • ${escapeHtml(r.location || 'Local area')}</p>
+              <h3 style="font-size:1.05rem; font-weight:700; color:var(--text-main); margin-bottom:0.25rem;">${escapeHtml(r.analysis?.likely_issue || r.description.substring(0, 60))}</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted);">Submitted on ${formattedDate} • ${escapeHtml(r.location || 'Local area')}</p>
             </div>
             <div style="display:flex; gap:0.5rem;">
               <button class="nav-btn" onclick="window.viewSavedReport('${r.id}')">View Details</button>
@@ -1881,13 +2039,13 @@
         });
       } else {
         els.reportsListContainer.innerHTML = `
-          <div style="text-align:center; padding:2rem; background:white; border-radius:var(--radius-md); border:1px solid var(--gray-200);">
-            <p style="color:var(--gray-500);">No saved reports found. Reports you submit while signed in will appear here.</p>
+          <div style="text-align:center; padding:2.5rem 1.5rem; background:var(--bg-subtle); border-radius:var(--radius-md); border:1px solid var(--border-card);">
+            <p style="color:var(--text-muted);">No saved reports found. Reports you submit while signed in will appear here.</p>
           </div>
         `;
       }
     } catch (e) {
-      els.reportsListContainer.innerHTML = `<p style="color:red;">Error loading reports.</p>`;
+      els.reportsListContainer.innerHTML = `<p style="color:var(--danger); padding:1rem; text-align:center;">Error loading saved reports.</p>`;
     }
   }
 

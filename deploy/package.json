@@ -5,7 +5,9 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "test": "node tests/acceptance.test.js"
+    "test": "node tests/acceptance.test.js && node tests/security.test.js",
+    "test:acceptance": "node tests/acceptance.test.js",
+    "test:security": "node tests/security.test.js"
   },
   "keywords": [
     "see-and-solve",

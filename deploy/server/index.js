@@ -48,7 +48,9 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
-  '.webp': 'image/webp'
+  '.webp': 'image/webp',
+  '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8'
 };
 
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -1085,20 +1087,15 @@ async function handleRequest(req, res) {
       return fs.createReadStream(safePath).pipe(res);
     }
 
-    // SPA Fallback: Only route client navigations WITHOUT a file extension to index.html
-    const hasFileExt = path.extname(safePath).length > 0;
-    if (!hasFileExt) {
-      const indexPath = path.join(PUBLIC_DIR, 'index.html');
-      if (fs.existsSync(indexPath)) {
-        res.writeHead(200, {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-          ...secHeaders
-        });
-        return fs.createReadStream(indexPath).pipe(res);
-      }
+    // Custom 404 HTML Page for any non-existent frontend route or file
+    const fallback404 = path.join(PUBLIC_DIR, '404.html');
+    if (fs.existsSync(fallback404) && !pathname.startsWith('/api/')) {
+      res.writeHead(404, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        ...secHeaders
+      });
+      return fs.createReadStream(fallback404).pipe(res);
     }
 
     res.writeHead(404, { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff' });
