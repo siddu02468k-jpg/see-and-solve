@@ -1,3 +1,15 @@
+// Suppress internal SQLite experimental warnings for clean log output
+if (typeof process !== 'undefined' && process.emitWarning) {
+  const origEmit = process.emitWarning;
+  process.emitWarning = function(warning, ...args) {
+    if (typeof warning === 'string' && (warning.includes('SQLite') || warning.includes('experimental'))) return;
+    if (args.length > 0 && typeof args[0] === 'string' && (args[0].includes('SQLite') || args[0].includes('ExperimentalWarning'))) return;
+    if (args.length > 1 && typeof args[1] === 'string' && (args[1].includes('SQLite') || args[1].includes('ExperimentalWarning'))) return;
+    if (warning && (warning.name === 'ExperimentalWarning' || (warning.message && warning.message.includes('SQLite')))) return;
+    return origEmit.apply(process, [warning, ...args]);
+  };
+}
+
 const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
 const fs = require('node:fs');
@@ -13,6 +25,7 @@ const db = new DatabaseSync(DB_PATH);
 // Initialize schema
 db.exec(`
   PRAGMA journal_mode = WAL;
+  PRAGMA foreign_keys = ON;
 
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
@@ -22,6 +35,7 @@ db.exec(`
     name TEXT,
     age INTEGER,
     preferred_language TEXT DEFAULT 'en',
+    is_admin INTEGER DEFAULT 0,
     created_at TEXT NOT NULL
   );
 
@@ -60,6 +74,13 @@ db.exec(`
     used INTEGER DEFAULT 0
   );
 `);
+
+// Migration for existing tables: add is_admin if not present
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0;`);
+} catch (e) {
+  // Column already present
+}
 
 module.exports = {
   db,

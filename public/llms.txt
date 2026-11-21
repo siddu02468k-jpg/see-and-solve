@@ -1,0 +1,25 @@
+# See & Solve — AI Visual Problem Diagnostics & Civic Solutions
+> Intelligent real-world problem diagnosis, safe step-by-step DIY troubleshooting, certified technician referrals, and municipal grievance drafts across Andhra Pradesh, India.
+
+## Overview
+See & Solve is a web-based artificial intelligence system that takes image telemetry (photographs) and problem descriptions of everyday breakdowns—such as plumbing, electrical failure, home appliances, IT networking, or municipal road and water leaks—and generates:
+1. **Visual Diagnostic Assessment**: Pinpoints the affected asset, observed facts, and plausible root causes with risk severity gauge.
+2. **Safe Step-by-Step Troubleshooting**: Provides preliminary safety checklists, sequential instructions, and critical stop thresholds.
+3. **Instructional Video Walkthroughs**: Canvas-based 2D visual schematic animations with voice narration and verified video resources.
+4. **Verified Local Technicians**: Local trade specialists in Guntur, Vijayawada, Visakhapatnam, Tirupati, Kurnool, and across Andhra Pradesh with ratings, verified addresses, and clickable directions.
+5. **Government Complaint Assistance**: Identifies responsible municipal corporations (e.g. GMC, VMC, GVMC, AP Transco) and generates formal personalized complaint drafts for the MeeSeva and MeekoSam grievance portals.
+
+## Technical Stack & Architecture
+- **Runtime**: Pure Node.js built-ins (`node:http`, `node:sqlite`, `node:crypto`) with zero third-party npm runtime dependencies.
+- **Client**: Vanilla ES6+ Web APIs, standard Web Speech recognition, HTML5 MediaDevices camera API, Canvas 2D animations, and KaTeX-compatible i18n localization (English, Telugu, Hindi).
+- **Security**: Strict Content Security Policy (CSP), timing-safe password comparisons, sliding-window rate limiters, XSS stripping, and sanitized input validation.
+
+## Endpoints
+- Web Application: https://seeandsolve.in/
+- System Status: https://seeandsolve.in/api/status
+- Sitemap: https://seeandsolve.in/sitemap.xml
+- Robots Directive: https://seeandsolve.in/robots.txt
+
+## Key Data Models
+- Problem Report: `{ description: string, imageBase64: string, location: string, language: 'en' | 'te' | 'hi', age: number }`
+- Diagnostic Result: `{ aiAnalysis: Object, safeTroubleshooting: Object, tutorialVideos: Object, technicians: Object, governmentAssistance: Object }`

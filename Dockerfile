@@ -25,4 +25,4 @@ ENV NODE_ENV=production
 ENV PORT=5050
 
 # Start application server
-CMD ["node", "server/index.js"]
+CMD ["node", "--no-warnings", "server/index.js"]

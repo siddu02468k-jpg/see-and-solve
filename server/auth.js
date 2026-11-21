@@ -39,6 +39,7 @@ function registerUser({ email, password, name, age, preferredLanguage = 'en' }) 
       name: name || 'User',
       age: userAge,
       preferred_language: preferredLanguage,
+      is_admin: false,
       created_at: createdAt
     },
     token
@@ -57,7 +58,11 @@ function loginUser({ email, password }) {
   }
 
   const expectedHash = hashPassword(password, user.salt);
-  if (expectedHash !== user.password_hash) {
+  const expectedBuf = Buffer.from(expectedHash, 'hex');
+  const actualBuf = Buffer.from(user.password_hash, 'hex');
+
+  // Constant-time comparison to prevent side-channel timing attacks
+  if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) {
     throw new Error('Invalid email or password.');
   }
 
@@ -69,6 +74,7 @@ function loginUser({ email, password }) {
       name: user.name,
       age: user.age,
       preferred_language: user.preferred_language,
+      is_admin: Boolean(user.is_admin),
       created_at: user.created_at
     },
     token
@@ -90,12 +96,17 @@ function getUserByToken(token) {
   const now = new Date().toISOString();
 
   const stmt = db.prepare(`
-    SELECT u.id, u.email, u.name, u.age, u.preferred_language, u.created_at
+    SELECT u.id, u.email, u.name, u.age, u.preferred_language, u.is_admin, u.created_at
     FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.token = ? AND s.expires_at > ?
   `);
-  return stmt.get(token, now) || null;
+  const row = stmt.get(token, now);
+  if (!row) return null;
+  return {
+    ...row,
+    is_admin: Boolean(row.is_admin)
+  };
 }
 
 function logoutUser(token) {
@@ -134,10 +145,13 @@ function requestPasswordReset(email) {
   const insertStmt = db.prepare('INSERT INTO password_resets (token, email, expires_at, used) VALUES (?, ?, ?, 0)');
   insertStmt.run(token, user.email, expiresAt);
 
+  const isProd = process.env.NODE_ENV === 'production';
   return {
     success: true,
-    resetToken: token,
-    message: 'Reset token generated successfully. Valid for 1 hour.'
+    ...(isProd ? {} : { resetToken: token }),
+    message: isProd
+      ? 'If this account exists, a password reset link has been dispatched to your registered email.'
+      : 'Reset token generated successfully. Valid for 1 hour.'
   };
 }
 
