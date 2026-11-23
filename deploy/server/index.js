@@ -1,3 +1,15 @@
+// Suppress internal SQLite experimental warnings for clean log output
+if (typeof process !== 'undefined' && process.emitWarning) {
+  const origEmit = process.emitWarning;
+  process.emitWarning = function(warning, ...args) {
+    if (typeof warning === 'string' && (warning.includes('SQLite') || warning.includes('experimental'))) return;
+    if (args.length > 0 && typeof args[0] === 'string' && (args[0].includes('SQLite') || args[0].includes('ExperimentalWarning'))) return;
+    if (args.length > 1 && typeof args[1] === 'string' && (args[1].includes('SQLite') || args[1].includes('ExperimentalWarning'))) return;
+    if (warning && (warning.name === 'ExperimentalWarning' || (warning.message && warning.message.includes('SQLite')))) return;
+    return origEmit.apply(process, [warning, ...args]);
+  };
+}
+
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -72,10 +84,10 @@ function getSecurityHeaders(isHtml = false, origin = null) {
   headers['Content-Security-Policy'] = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "media-src 'self' blob:",
-    "font-src 'self'",
+    "font-src 'self' data: https://fonts.gstatic.com",
     "connect-src 'self' https://nominatim.openstreetmap.org https://meekosam.ap.gov.in",
     "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
     "object-src 'none'",

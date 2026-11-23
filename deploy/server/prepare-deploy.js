@@ -6,9 +6,19 @@ const deployDir = path.join(root, 'deploy');
 
 // Clean or recreate deployDir
 if (fs.existsSync(deployDir)) {
-  fs.rmSync(deployDir, { recursive: true, force: true });
+  try {
+    fs.rmSync(deployDir, { recursive: true, force: true });
+  } catch (err) {
+    for (const child of fs.readdirSync(deployDir)) {
+      try {
+        fs.rmSync(path.join(deployDir, child), { recursive: true, force: true });
+      } catch (e) {}
+    }
+  }
 }
-fs.mkdirSync(deployDir, { recursive: true });
+if (!fs.existsSync(deployDir)) {
+  fs.mkdirSync(deployDir, { recursive: true });
+}
 
 function copyRecursive(src, dest) {
   const stat = fs.statSync(src);

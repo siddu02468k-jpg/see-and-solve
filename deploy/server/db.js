@@ -1,3 +1,15 @@
+// Suppress internal SQLite experimental warnings for clean log output
+if (typeof process !== 'undefined' && process.emitWarning) {
+  const origEmit = process.emitWarning;
+  process.emitWarning = function(warning, ...args) {
+    if (typeof warning === 'string' && (warning.includes('SQLite') || warning.includes('experimental'))) return;
+    if (args.length > 0 && typeof args[0] === 'string' && (args[0].includes('SQLite') || args[0].includes('ExperimentalWarning'))) return;
+    if (args.length > 1 && typeof args[1] === 'string' && (args[1].includes('SQLite') || args[1].includes('ExperimentalWarning'))) return;
+    if (warning && (warning.name === 'ExperimentalWarning' || (warning.message && warning.message.includes('SQLite')))) return;
+    return origEmit.apply(process, [warning, ...args]);
+  };
+}
+
 const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
 const fs = require('node:fs');
