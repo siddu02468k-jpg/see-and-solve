@@ -67,24 +67,48 @@
     </g>
   </g>
 
-  <!-- Right: Quantum Aperture Graphic in Electric Cobalt & Acid Lime -->
+  <!-- Right: Cybernetic Civic Shield Pro Graphic in Electric Cobalt & Acid Lime -->
   <g transform="translate(940, 315)">
-    <!-- Outer ambient circle -->
-    <circle cx="0" cy="0" r="165" fill="#080d19" stroke="rgba(21, 88, 201, 0.4)" stroke-width="2"/>
-    <!-- Cobalt rotating dashed ring -->
-    <circle cx="0" cy="0" r="135" fill="none" stroke="#1558C9" stroke-width="2.5" stroke-dasharray="16 10" opacity="0.85"/>
-    <circle cx="0" cy="0" r="100" fill="none" stroke="rgba(212, 255, 36, 0.35)" stroke-width="1.5"/>
+    <!-- Ambient Radial Aura -->
+    <circle cx="0" cy="0" r="175" fill="#080e1e" stroke="rgba(21, 88, 201, 0.45)" stroke-width="2"/>
+    <circle cx="0" cy="0" r="148" fill="none" stroke="rgba(212, 255, 36, 0.25)" stroke-width="1.5" stroke-dasharray="12 8"/>
+    <circle cx="0" cy="0" r="120" fill="none" stroke="rgba(21, 88, 201, 0.35)" stroke-width="1"/>
 
-    <!-- Geometric Neural Aperture -->
-    <polygon points="0,-75 65,-37 65,37 0,75 -65,37 -65,-37" fill="rgba(21, 88, 201, 0.25)" stroke="#1558C9" stroke-width="2.5"/>
-    <!-- Glowing Acid Lime Core -->
-    <circle cx="0" cy="0" r="28" fill="#D4FF24"/>
-    <circle cx="0" cy="0" r="12" fill="#030407"/>
-    <circle cx="0" cy="0" r="4" fill="#D4FF24"/>
-
-    <!-- Crosshair Target Pins -->
-    <path d="M0,-115 L0,-85 M0,115 L0,85 M-115,0 L-85,0 M115,0 L85,0" stroke="#1558C9" stroke-width="2.5" opacity="0.9"/>
-    <path d="M0,-95 L0,-85 M0,95 L0,85 M-95,0 L-85,0 M95,0 L85,0" stroke="#D4FF24" stroke-width="2"/>
+    <!-- Scaled Cybernetic Civic Shield Pro -->
+    <g transform="translate(-144, -144) scale(6)">
+      <!-- Base Shield Plate -->
+      <polygon points="24,4 42,8.5 41.5,23 34,34 24,44 14,34 6.5,23 6,8.5" fill="#060b18"/>
+      <!-- Inner Bevel -->
+      <polygon points="24,8.5 38.5,12 38,22.5 31.5,32 24,39.5 16.5,32 10,22.5 9.5,12" fill="rgba(12,22,48,0.85)" stroke="#0A235F" stroke-width="0.8"/>
+      <!-- Central Seam -->
+      <line x1="24" y1="6" x2="24" y2="41" stroke="rgba(59,130,246,0.5)" stroke-width="0.8"/>
+      <!-- Left Wing Armor (Cobalt) -->
+      <path d="M 24,4 L 6,8.5 L 6.5,23 L 14,34 L 24,44" stroke="#1558C9" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M 24,4 L 6,8.5 L 6.5,23 L 14,34 L 24,44" stroke="rgba(255,255,255,0.4)" stroke-width="0.6" stroke-linejoin="round"/>
+      <!-- Right Wing Kinetic Edge (Acid Lime) -->
+      <path d="M 24,4 L 42,8.5 L 41.5,23 L 34,34 L 24,44" stroke="#D4FF24" stroke-width="2.4" stroke-linejoin="round"/>
+      <!-- Outer Range Reticle -->
+      <circle cx="24" cy="23.5" r="9.5" fill="none" stroke="#1558C9" stroke-width="0.9" stroke-dasharray="3 1.5"/>
+      <!-- Crosshairs -->
+      <line x1="12" y1="23.5" x2="15.5" y2="23.5" stroke="#3B82F6" stroke-width="0.8"/>
+      <line x1="32.5" y1="23.5" x2="36" y2="23.5" stroke="#D4FF24" stroke-width="0.8"/>
+      <line x1="24" y1="11.5" x2="24" y2="15" stroke="#3B82F6" stroke-width="0.8"/>
+      <line x1="24" y1="32" x2="24" y2="35.5" stroke="#3B82F6" stroke-width="0.8"/>
+      <!-- Aperture Housing -->
+      <circle cx="24" cy="23.5" r="7" fill="#040916" stroke="#1558C9" stroke-width="1.1"/>
+      <!-- Shutter Blades -->
+      <line x1="24" y1="16.5" x2="28" y2="21" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+      <line x1="30.5" y1="21" x2="27.5" y2="26" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+      <line x1="29" y1="28" x2="23.5" y2="28.5" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+      <line x1="24" y1="30.5" x2="20" y2="26" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+      <line x1="17.5" y1="26" x2="20.5" y2="21" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+      <line x1="19" y1="19" x2="24.5" y2="18.5" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round"/>
+      <!-- Pupil -->
+      <circle cx="24" cy="23.5" r="3.5" fill="#D4FF24"/>
+      <circle cx="24" cy="23.5" r="1.3" fill="#FFFFFF"/>
+      <!-- Laser Beam -->
+      <line x1="16" y1="23.5" x2="32" y2="23.5" stroke="rgba(212,255,36,0.85)" stroke-width="0.75"/>
+    </g>
   </g>
 
   <!-- Footer Watermark -->
