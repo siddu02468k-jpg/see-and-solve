@@ -1,0 +1,21 @@
+{
+  "name": "see-and-solve-pro",
+  "version": "1.0.0",
+  "description": "See & Solve — AI-powered visual diagnosis, real tutorial guidance, localized technician discovery, and government complaint automation.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --no-warnings server/index.js",
+    "test": "node tests/acceptance.test.js && node tests/security.test.js",
+    "test:acceptance": "node tests/acceptance.test.js",
+    "test:security": "node tests/security.test.js"
+  },
+  "keywords": [
+    "see-and-solve",
+    "ai-vision",
+    "troubleshooting",
+    "technicians",
+    "civic-grievance"
+  ],
+  "author": "See & Solve Team",
+  "license": "ISC"
+}
