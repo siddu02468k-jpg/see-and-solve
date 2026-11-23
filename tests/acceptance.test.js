@@ -76,7 +76,7 @@ function request(method, urlPath, body = null, headers = {}) {
 // Test Runner
 async function runAllAcceptanceTests() {
   console.log('================================================================');
-  console.log('  RUNNING SEE & SOLVE ACCEPTANCE TEST SUITE (13 SCENARIOS)');
+  console.log('  RUNNING SEE & SOLVE ACCEPTANCE TEST SUITE (14 SCENARIOS)');
   console.log('================================================================\n');
 
   const results = [];
@@ -473,6 +473,49 @@ async function runAllAcceptanceTests() {
     }
 
     // -------------------------------------------------------------------------
+    // TEST 14: Equal features for guests & dynamic age verification
+    // Expected:
+    // - Guest users get identical features (AI videos, troubleshooting, technicians)
+    // - Dynamic age verification endpoint unlocks videos without account sign-up
+    // -------------------------------------------------------------------------
+    {
+      // Step A: Guest user verifies age 18 dynamically
+      const verifyRes = await request('POST', '/api/reports/verify-age', {
+        age: 18,
+        tutorialSearchQuery: 'how to fix leaking sink pipe',
+        isSafeForDIY: true,
+        technicalCategory: 'Plumbing & Water Systems',
+        language: 'en',
+        likelyIssue: 'Leaking sink P-trap or loose slip nut'
+      });
+
+      const dVerify = verifyRes.data;
+      const verifySuccess = dVerify?.success === true;
+      const videosEligible = dVerify?.tutorialVideos?.eligible === true;
+      const hasAiVideo = Boolean(dVerify?.tutorialVideos?.aiTutorialVideo?.scenes?.length > 0);
+      const showVideosFlag = dVerify?.showVideos === true;
+
+      // Step B: Guest user direct analysis with age 18 has full feature parity
+      const guestAnalyzeRes = await request('POST', '/api/reports/analyze', {
+        description: 'Laptop cannot connect to home Wi-Fi network',
+        location: 'Vijayawada',
+        age: 20
+      });
+
+      const dGuest = guestAnalyzeRes.data;
+      const guestHasDiag = Boolean(dGuest?.aiAnalysis?.likely_issue);
+      const guestHasSteps = Boolean(dGuest?.safeTroubleshooting?.steps?.length > 0);
+      const guestHasAiVideo = Boolean(dGuest?.tutorialVideos?.aiTutorialVideo);
+      const guestHasTechs = Boolean(dGuest?.technicians?.technicians?.length >= 0);
+
+      const passed = verifyRes.status === 200 && verifySuccess && videosEligible && hasAiVideo && showVideosFlag &&
+                     guestAnalyzeRes.status === 200 && guestHasDiag && guestHasSteps && guestHasAiVideo;
+
+      recordResult(14, 'Guest feature parity & dynamic age verification', passed,
+        `Dynamic Age Verify: ${verifySuccess}, AI Video Storyboard: ${hasAiVideo}, Guest Feature Parity: ${guestHasDiag && guestHasSteps && guestHasAiVideo}`);
+    }
+
+    // -------------------------------------------------------------------------
     // SUMMARY
     // -------------------------------------------------------------------------
     console.log('================================================================');
@@ -481,7 +524,7 @@ async function runAllAcceptanceTests() {
     console.log('================================================================');
 
     if (totalPassed === results.length) {
-      console.log('\n🎉 ALL 13 ACCEPTANCE TESTS PASSED SUCCESSFULLY!\n');
+      console.log(`\n🎉 ALL ${results.length} ACCEPTANCE TESTS PASSED SUCCESSFULLY!\n`);
       process.exit(0);
     } else {
       console.error('\n❌ SOME ACCEPTANCE TESTS FAILED.\n');

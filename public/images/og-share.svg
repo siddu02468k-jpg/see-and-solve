@@ -1,71 +1,92 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#060911"/>
-      <stop offset="60%" stop-color="#0b1120"/>
-      <stop offset="100%" stop-color="#0f172a"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#030407"/>
+      <stop offset="50%" stop-color="#060b17"/>
+      <stop offset="100%" stop-color="#030407"/>
     </linearGradient>
-    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00e5ff"/>
-      <stop offset="100%" stop-color="#3b82f6"/>
+    <linearGradient id="blueGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1558C9"/>
+      <stop offset="50%" stop-color="#D4FF24"/>
+      <stop offset="100%" stop-color="#1558C9"/>
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    <radialGradient id="cobaltRadial" cx="80%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#1558C9" stop-opacity="0.38"/>
+      <stop offset="60%" stop-color="#1558C9" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#030407" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="limeSubtle" cx="20%" cy="20%" r="40%">
+      <stop offset="0%" stop-color="#D4FF24" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#030407" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
-  <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <circle cx="950" cy="315" r="400" fill="url(#glow)"/>
+  <!-- Base Midnight Black Canvas -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <rect width="1200" height="630" fill="url(#limeSubtle)"/>
+  <circle cx="950" cy="315" r="450" fill="url(#cobaltRadial)"/>
 
-  <!-- Top Accent Bar -->
-  <rect x="0" y="0" width="1200" height="6" fill="url(#cyanGrad)"/>
+  <!-- Top Accent Laser Line -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#blueGlow)"/>
 
-  <!-- Grid Reticles -->
-  <line x1="80" y1="80" x2="1120" y2="80" stroke="#1e293b" stroke-width="1" stroke-dasharray="8 8"/>
-  <line x1="80" y1="550" x2="1120" y2="550" stroke="#1e293b" stroke-width="1" stroke-dasharray="8 8"/>
+  <!-- Subtle Cyber Grid Coordinates -->
+  <line x1="80" y1="80" x2="1120" y2="80" stroke="rgba(21, 88, 201, 0.25)" stroke-width="1" stroke-dasharray="8 8"/>
+  <line x1="80" y1="550" x2="1120" y2="550" stroke="rgba(21, 88, 201, 0.25)" stroke-width="1" stroke-dasharray="8 8"/>
 
-  <!-- Left: Content Block -->
-  <g transform="translate(100, 140)">
+  <!-- Left Content Column -->
+  <g transform="translate(100, 130)">
     <!-- Badges Row -->
-    <rect x="0" y="0" width="180" height="34" rx="17" fill="rgba(0, 229, 255, 0.12)" stroke="#00e5ff" stroke-width="1.2"/>
-    <text x="90" y="22" fill="#00e5ff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" text-anchor="middle" letter-spacing="1">NEURAL VISION 2.0</text>
+    <rect x="0" y="0" width="220" height="34" rx="17" fill="rgba(212, 255, 36, 0.12)" stroke="#D4FF24" stroke-width="1.2"/>
+    <text x="110" y="22" fill="#D4FF24" font-family="'Outfit', -apple-system, sans-serif" font-size="13" font-weight="700" text-anchor="middle" letter-spacing="1.5">NEURAL VISION 2.0</text>
 
-    <rect x="195" y="0" width="180" height="34" rx="17" fill="rgba(59, 130, 246, 0.12)" stroke="#3b82f6" stroke-width="1.2"/>
-    <text x="285" y="22" fill="#60a5fa" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" text-anchor="middle" letter-spacing="1">ANDHRA PRADESH</text>
+    <rect x="236" y="0" width="180" height="34" rx="17" fill="#1558C9"/>
+    <text x="326" y="22" fill="#FFFFFF" font-family="'Outfit', -apple-system, sans-serif" font-size="13" font-weight="700" text-anchor="middle" letter-spacing="1">ANDHRA PRADESH</text>
 
     <!-- Main Title -->
-    <text x="0" y="115" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="64" font-weight="800" letter-spacing="-1">See &amp; Solve</text>
+    <text x="0" y="118" fill="#FFFFFF" font-family="'Outfit', -apple-system, sans-serif" font-size="70" font-weight="800" letter-spacing="-1.5">See &amp; Solve</text>
 
-    <!-- Subtitle -->
-    <text x="0" y="175" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="600">AI Visual Problem Diagnostics &amp; Local Resolution</text>
+    <!-- Subtitle in Acid Lime -->
+    <text x="0" y="176" fill="#D4FF24" font-family="'Outfit', -apple-system, sans-serif" font-size="28" font-weight="700">Autonomous AI Visual Diagnostics &amp; Solutions</text>
 
-    <!-- Description Paragraph -->
-    <text x="0" y="235" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="400">
-      <tspan x="0" dy="0">Instant photo-to-solution intelligence for home, appliance, and civic issues.</tspan>
-      <tspan x="0" dy="28">Safe step-by-step DIY walkthroughs, verified technicians, and municipal grievance drafts.</tspan>
+    <!-- Description Paragraph in Inter -->
+    <text x="0" y="234" fill="#CBD5E1" font-family="'Inter', -apple-system, sans-serif" font-size="20" font-weight="400">
+      <tspan x="0" dy="0">Instant photo-to-solution intelligence for household, appliance, and civic issues.</tspan>
+      <tspan x="0" dy="30">Safe step-by-step DIY walkthroughs, verified local technicians, and civic complaint drafts.</tspan>
     </text>
 
     <!-- Feature Pillars -->
-    <g transform="translate(0, 310)">
-      <circle cx="10" cy="10" r="5" fill="#00e5ff"/>
-      <text x="26" y="15" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600">Zero Sign-In Required</text>
+    <g transform="translate(0, 315)">
+      <rect x="0" y="0" width="185" height="44" rx="22" fill="#080d19" stroke="rgba(21, 88, 201, 0.45)" stroke-width="1.5"/>
+      <text x="92" y="28" fill="#FFFFFF" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="600" text-anchor="middle"><tspan fill="#D4FF24">✓ </tspan>AI Visual Scan</text>
 
-      <circle cx="240" cy="10" r="5" fill="#00e5ff"/>
-      <text x="256" y="15" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600">Verified AP Directory</text>
+      <rect x="200" y="0" width="200" height="44" rx="22" fill="#080d19" stroke="rgba(21, 88, 201, 0.45)" stroke-width="1.5"/>
+      <text x="300" y="28" fill="#FFFFFF" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="600" text-anchor="middle"><tspan fill="#D4FF24">✓ </tspan>Verified Techs</text>
 
-      <circle cx="470" cy="10" r="5" fill="#00e5ff"/>
-      <text x="486" y="15" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600">MeeSeva &amp; MeekoSam Ready</text>
+      <rect x="415" y="0" width="225" height="44" rx="22" fill="#080d19" stroke="rgba(21, 88, 201, 0.45)" stroke-width="1.5"/>
+      <text x="527" y="28" fill="#FFFFFF" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-weight="600" text-anchor="middle"><tspan fill="#D4FF24">✓ </tspan>MeeSeva Civic Node</text>
     </g>
   </g>
 
-  <!-- Right: Quantum Aperture Graphic -->
-  <g transform="translate(930, 315)">
-    <circle cx="0" cy="0" r="160" fill="none" stroke="rgba(0, 229, 255, 0.2)" stroke-width="2" stroke-dasharray="16 12"/>
-    <circle cx="0" cy="0" r="120" fill="none" stroke="#00e5ff" stroke-width="3" stroke-dasharray="240 40"/>
-    <polygon points="0,-85 74,-42 74,42 0,85 -74,42 -74,-42" fill="rgba(0, 229, 255, 0.12)" stroke="#38bdf8" stroke-width="2.5"/>
-    <circle cx="0" cy="0" r="24" fill="#00e5ff"/>
-    <circle cx="0" cy="0" r="45" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <!-- Right: Quantum Aperture Graphic in Electric Cobalt & Acid Lime -->
+  <g transform="translate(940, 315)">
+    <!-- Outer ambient circle -->
+    <circle cx="0" cy="0" r="165" fill="#080d19" stroke="rgba(21, 88, 201, 0.4)" stroke-width="2"/>
+    <!-- Cobalt rotating dashed ring -->
+    <circle cx="0" cy="0" r="135" fill="none" stroke="#1558C9" stroke-width="2.5" stroke-dasharray="16 10" opacity="0.85"/>
+    <circle cx="0" cy="0" r="100" fill="none" stroke="rgba(212, 255, 36, 0.35)" stroke-width="1.5"/>
+
+    <!-- Geometric Neural Aperture -->
+    <polygon points="0,-75 65,-37 65,37 0,75 -65,37 -65,-37" fill="rgba(21, 88, 201, 0.25)" stroke="#1558C9" stroke-width="2.5"/>
+    <!-- Glowing Acid Lime Core -->
+    <circle cx="0" cy="0" r="28" fill="#D4FF24"/>
+    <circle cx="0" cy="0" r="12" fill="#030407"/>
+    <circle cx="0" cy="0" r="4" fill="#D4FF24"/>
+
+    <!-- Crosshair Target Pins -->
+    <path d="M0,-115 L0,-85 M0,115 L0,85 M-115,0 L-85,0 M115,0 L85,0" stroke="#1558C9" stroke-width="2.5" opacity="0.9"/>
+    <path d="M0,-95 L0,-85 M0,95 L0,85 M-95,0 L-85,0 M95,0 L85,0" stroke="#D4FF24" stroke-width="2"/>
   </g>
+
+  <!-- Footer Watermark -->
+  <text x="100" y="585" fill="#94A3B8" font-family="'Inter', -apple-system, sans-serif" font-size="14" letter-spacing="0.5">https://seeandsolve.in • Cyber-Precision AI Diagnostics Node</text>
 </svg>

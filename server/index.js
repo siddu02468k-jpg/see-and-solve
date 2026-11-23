@@ -84,10 +84,10 @@ function getSecurityHeaders(isHtml = false, origin = null) {
   headers['Content-Security-Policy'] = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "media-src 'self' blob:",
-    "font-src 'self'",
+    "font-src 'self' data: https://fonts.gstatic.com",
     "connect-src 'self' https://nominatim.openstreetmap.org https://meekosam.ap.gov.in",
     "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
     "object-src 'none'",

@@ -204,6 +204,232 @@
         pill.classList.add('active');
       }
     });
+    if (typeof syncStepperSpotlight === 'function') {
+      syncStepperSpotlight();
+    }
+  }
+
+  // =========================================================================
+  // 5. SPOTLIGHT ANIMATION CONTROLLER (COLUMN 1 / STEPPER BAR)
+  // =========================================================================
+  let syncStepperSpotlight = () => {};
+
+  function initStepperSpotlight() {
+    const bar = document.querySelector('.stepper-bar');
+    if (!bar) return;
+    const items = [...bar.querySelectorAll('.step-pill')];
+    if (!items.length) return;
+
+    let cone = bar.querySelector('.cone');
+    if (!cone) {
+      cone = document.createElement('div');
+      cone.className = 'cone';
+      bar.prepend(cone);
+    }
+
+    const cx = i => {
+      if (!items[i]) return 0;
+      return items[i].offsetLeft + items[i].offsetWidth / 2;
+    };
+
+    let act = items.findIndex(el => el.classList.contains('active'));
+    if (act < 0) act = 0;
+
+    let x = cx(act), v = 0, target = x, hover = false, near = act;
+    const nearest = px => items.reduce((b, _, j) => Math.abs(cx(j) - px) < Math.abs(cx(b) - px) ? j : b, 0);
+
+    const pos = e => {
+      const r = bar.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width };
+    };
+
+    bar.addEventListener('pointermove', e => {
+      const p = pos(e);
+      hover = true;
+      near = nearest(p.x);
+      target = cx(near);
+    });
+
+    const leave = () => {
+      hover = false;
+      act = items.findIndex(el => el.classList.contains('active'));
+      if (act < 0) act = 0;
+      near = act;
+      target = cx(act);
+    };
+
+    bar.addEventListener('pointerleave', leave);
+
+    items.forEach((pill, idx) => {
+      pill.addEventListener('click', () => {
+        if (idx === 0) {
+          switchTab('report');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (idx === 2 && currentReportData) {
+          switchTab('report');
+          const resultsSec = document.getElementById('results-section');
+          if (resultsSec) resultsSec.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    syncStepperSpotlight = () => {
+      act = items.findIndex(el => el.classList.contains('active'));
+      if (act < 0) act = 0;
+      if (!hover) target = cx(act);
+    };
+
+    function draw() {
+      const coneW = cone.offsetWidth || 120;
+      cone.style.transform = 'translateX(' + (x - coneW / 2).toFixed(2) + 'px)';
+      const lit = hover ? near : act;
+      items.forEach((e, j) => {
+        e.classList.toggle('spotlight-hit', j === lit);
+      });
+    }
+
+    function loop() {
+      const k = hover ? 0.16 : 0.12, dmp = hover ? 0.72 : 0.68;
+      if (!hover) {
+        act = items.findIndex(el => el.classList.contains('active'));
+        if (act < 0) act = 0;
+        target = cx(act);
+      }
+      v = (v + (target - x) * k) * dmp;
+      x += v;
+      draw();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    window.addEventListener('resize', () => {
+      act = items.findIndex(el => el.classList.contains('active'));
+      if (act < 0) act = 0;
+      target = x = cx(act);
+    });
+  }
+
+  // =========================================================================
+  // 2. DARK NEON LENS ANIMATION CONTROLLER (COLUMN 2 / NAVIGATION BAR)
+  // =========================================================================
+  let syncNavNeonLens = () => {};
+
+  function initNavNeonLens() {
+    const nav = document.querySelector('.nav-links');
+    if (!nav) return;
+    const items = [...nav.querySelectorAll('.nav-btn')];
+    if (!items.length) return;
+
+    let lens = nav.querySelector('.lens');
+    if (!lens) {
+      lens = document.createElement('div');
+      lens.className = 'lens';
+      nav.prepend(lens);
+    }
+
+    const cx = i => {
+      if (!items[i]) return 0;
+      return items[i].offsetLeft + items[i].offsetWidth / 2;
+    };
+    const cw = i => {
+      if (!items[i]) return 80;
+      return items[i].offsetWidth;
+    };
+
+    let act = items.findIndex(el => el.classList.contains('active'));
+    if (act < 0) act = 0;
+
+    lens.style.width = cw(act) + 'px';
+
+    let x = cx(act), v = 0, target = x, hover = false, tilt = 0, tiltT = 0, near = act;
+    const nearest = px => items.reduce((b, _, j) => Math.abs(cx(j) - px) < Math.abs(cx(b) - px) ? j : b, 0);
+
+    const pos = e => {
+      const r = nav.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width };
+    };
+
+    nav.addEventListener('pointermove', e => {
+      const p = pos(e);
+      hover = true;
+      near = nearest(p.x);
+      target = Math.max(cx(0), Math.min(cx(items.length - 1), p.x));
+      nav.style.setProperty('--mx', p.x + 'px');
+      nav.style.setProperty('--my', p.y + 'px');
+      nav.style.setProperty('--glow', '1');
+      tiltT = (p.x / (p.w || 1) - 0.5) * 8;
+    });
+
+    const leave = () => {
+      hover = false;
+      act = items.findIndex(el => el.classList.contains('active'));
+      if (act < 0) act = 0;
+      near = act;
+      target = cx(act);
+      tiltT = 0;
+      nav.style.setProperty('--glow', '0');
+    };
+
+    nav.addEventListener('pointerleave', leave);
+    nav.addEventListener('pointerdown', e => {
+      if (nav.setPointerCapture) {
+        try { nav.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+    });
+    nav.addEventListener('pointerup', e => {
+      const p = pos(e);
+      const clickedIdx = nearest(p.x);
+      if (items[clickedIdx]) {
+        const tabAttr = items[clickedIdx].getAttribute('data-tab');
+        if (tabAttr) switchTab(tabAttr);
+      }
+      if (e.pointerType !== 'mouse') leave();
+    });
+
+    syncNavNeonLens = () => {
+      act = items.findIndex(el => el.classList.contains('active'));
+      if (act < 0) act = 0;
+      if (!hover) target = cx(act);
+      if (items[act]) {
+        lens.style.width = cw(act) + 'px';
+      }
+    };
+
+    function draw() {
+      const curIndex = hover ? near : act;
+      if (items[curIndex]) {
+        const targetW = cw(curIndex);
+        const currentW = parseFloat(lens.style.width) || targetW;
+        const newW = currentW + (targetW - currentW) * 0.18;
+        lens.style.width = newW.toFixed(2) + 'px';
+      }
+      const s = Math.min(0.45, Math.abs(v) / 40);
+      const curLensW = parseFloat(lens.style.width) || cw(curIndex) || 84;
+      lens.style.transform = 'translateX(' + (x - curLensW / 2).toFixed(2) + 'px) scaleX(' + (1 + s).toFixed(3) + ') scaleY(' + (1 - s * 0.35).toFixed(3) + ')';
+    }
+
+    function loop() {
+      const k = hover ? 0.16 : 0.12, dmp = hover ? 0.72 : 0.68;
+      if (!hover) {
+        act = items.findIndex(el => el.classList.contains('active'));
+        if (act < 0) act = 0;
+        target = cx(act);
+      }
+      v = (v + (target - x) * k) * dmp;
+      x += v;
+      tilt += (tiltT - tilt) * 0.12;
+      nav.style.transform = 'perspective(700px) rotateY(' + tilt.toFixed(2) + 'deg)';
+      draw();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    window.addEventListener('resize', () => {
+      act = items.findIndex(el => el.classList.contains('active'));
+      if (act < 0) act = 0;
+      target = x = cx(act);
+      if (items[act]) lens.style.width = cw(act) + 'px';
+    });
   }
 
   // Navigation Switch
@@ -253,6 +479,9 @@
       loadUserReports();
     } else if (tabId === 'profile') {
       loadProfileData();
+    }
+    if (typeof syncNavNeonLens === 'function') {
+      syncNavNeonLens();
     }
   }
 
@@ -2206,5 +2435,7 @@
   // Initial Boot
   checkSession();
   updateStepper(1);
+  initStepperSpotlight();
+  initNavNeonLens();
 
 })();
