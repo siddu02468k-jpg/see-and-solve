@@ -2573,11 +2573,79 @@
     }
   }
 
+  /* =========================================================================
+     UI INFO 'i' TOOLTIP & POPOVER INTERACTION SYSTEM
+     Smooth desktop hover & mobile tap toggle with viewport auto-clamping
+     ========================================================================= */
+  function initUiInfoTooltips() {
+    function positionPopover(btn, popover) {
+      if (!popover) return;
+      btn.classList.remove('popover-bottom');
+      popover.classList.remove('clamp-left', 'clamp-right');
+
+      const btnRect = btn.getBoundingClientRect();
+      const rect = popover.getBoundingClientRect();
+
+      // Check vertical flip (if not enough space above, flip to bottom)
+      if (btnRect.top - rect.height < 15) {
+        btn.classList.add('popover-bottom');
+      }
+
+      // Re-check after potential flip and clamp within horizontal viewport
+      const currentRect = popover.getBoundingClientRect();
+      if (currentRect.left < 12) {
+        popover.classList.add('clamp-left');
+      } else if (currentRect.right > window.innerWidth - 12) {
+        popover.classList.add('clamp-right');
+      }
+    }
+
+    document.querySelectorAll('.ui-info-btn').forEach(btn => {
+      const popover = btn.querySelector('.ui-info-popover');
+
+      // Desktop hover position check
+      btn.addEventListener('mouseenter', () => {
+        positionPopover(btn, popover);
+      });
+
+      // Mobile / Click toggle
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const wasActive = btn.classList.contains('is-active');
+
+        // Close all other open popovers
+        document.querySelectorAll('.ui-info-btn.is-active').forEach(other => other.classList.remove('is-active'));
+
+        if (!wasActive) {
+          btn.classList.add('is-active');
+          positionPopover(btn, popover);
+        }
+      });
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.ui-info-btn')) {
+        document.querySelectorAll('.ui-info-btn.is-active').forEach(btn => btn.classList.remove('is-active'));
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.ui-info-btn.is-active').forEach(btn => btn.classList.remove('is-active'));
+      }
+    });
+  }
+
   // Initial Boot
   checkSession();
   updateStepper(1);
   initStepperSpotlight();
   initNavNeonLens();
   initAppRevealSplash();
+  initUiInfoTooltips();
 
 })();

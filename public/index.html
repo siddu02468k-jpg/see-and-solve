@@ -99,7 +99,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="/css/styles.css?v=3.7.0">
+  <link rel="stylesheet" href="/css/styles.css?v=3.9.0">
 </head>
 <body>
 
@@ -349,8 +349,13 @@
               <span>Andhra Pradesh Node</span>
             </span>
           </div>
-          <h1 data-i18n="submitTitle" id="main-page-h1">Report a Real-World Problem</h1>
-          <p data-i18n="submitSubtitle">Upload visual telemetry and description to execute instant AI diagnostics, safe step walkthroughs, and verified local assistance.</p>
+          <h1 id="main-page-h1" class="heading-with-info">
+            <span data-i18n="submitTitle">Report a Real-World Problem</span>
+            <button type="button" class="ui-info-btn" aria-label="About problem diagnostics" title="More information">
+              <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+              <span class="ui-info-popover" role="tooltip" data-i18n="submitSubtitle">Upload visual telemetry and description to execute instant AI diagnostics, safe step walkthroughs, and verified local assistance.</span>
+            </button>
+          </h1>
         </div>
 
         <!-- Quick Sample Presets -->
@@ -369,7 +374,13 @@
 
           <!-- Photo Input Section -->
           <div class="form-group">
-            <label class="form-label" data-i18n="photoLabel">Problem Photograph <span class="req">*</span></label>
+            <label class="form-label">
+              <span data-i18n="photoLabel">Problem Photograph</span> <span class="req">*</span>
+              <button type="button" class="ui-info-btn" aria-label="Photograph guidelines" title="More information">
+                <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                <span class="ui-info-popover" role="tooltip">Capture or upload a clear photo of the problem. Accepted formats: JPEG, PNG, WebP up to 10MB. Clear focus and good lighting ensure maximum AI diagnostic accuracy.</span>
+              </button>
+            </label>
             <input type="file" id="image-file-input" accept="image/*" style="display:none;">
 
             <!-- Dual Capture / Upload Buttons -->
@@ -421,7 +432,13 @@
 
           <!-- Problem Description (Mandatory) -->
           <div class="form-group">
-            <label class="form-label" for="problem-description" data-i18n="descLabel">Problem Description <span class="req">*</span></label>
+            <label class="form-label" for="problem-description">
+              <span data-i18n="descLabel">Problem Description</span> <span class="req">*</span>
+              <button type="button" class="ui-info-btn" aria-label="Description tips" title="More information">
+                <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                <span class="ui-info-popover" role="tooltip">Detail what happened, observable symptoms (leaks, noises, error codes), or model names. Voice input is also supported.</span>
+              </button>
+            </label>
             <div class="textarea-wrapper">
               <textarea id="problem-description" class="form-textarea" rows="3" required
                 data-i18n-placeholder="descPlaceholder"
@@ -439,7 +456,13 @@
 
           <!-- Location Input & Quick City Selector -->
           <div class="form-group">
-            <label class="form-label" for="location-input" data-i18n="locationLabel">Location (City or Locality)</label>
+            <label class="form-label" for="location-input">
+              <span data-i18n="locationLabel">Location (City or Locality)</span>
+              <button type="button" class="ui-info-btn" aria-label="Location purpose" title="More information">
+                <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                <span class="ui-info-popover" role="tooltip">Used to connect your issue with verified local technicians and official municipal grievance portals across Andhra Pradesh (e.g. GMC, VMC).</span>
+              </button>
+            </label>
             <div class="input-with-action">
               <input type="text" id="location-input" class="form-input" 
                 data-i18n-placeholder="locationPlaceholder"
@@ -471,6 +494,10 @@
             <div class="age-card-header">
               <label class="form-label" style="margin-bottom:0;">
                 <span data-i18n="ageLabel">Access Protocol</span> <span class="req">*</span>
+                <button type="button" class="ui-info-btn" aria-label="Safety compliance details" title="More information">
+                  <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                  <span class="ui-info-popover" role="tooltip">Youth safety compliance: users 18+ receive instructional 3D walkthroughs, while all users receive safety checklists and certified technician directories.</span>
+                </button>
               </label>
               <span class="pill-badge pill-free">
                 <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V4a3 3 0 0 1 6 0"/></svg>
@@ -561,8 +588,13 @@
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </span>
             <div>
-              <h3>Additional Diagnostic Information Needed</h3>
-              <p>The AI needs one quick clarification before diagnosing the issue:</p>
+              <h3 class="heading-with-info">
+                <span>Additional Diagnostic Information Needed</span>
+                <button type="button" class="ui-info-btn" aria-label="Clarification info" title="More information">
+                  <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                  <span class="ui-info-popover" role="tooltip">The AI needs one targeted clarification to distinguish between private domestic repair vs municipal public infrastructure.</span>
+                </button>
+              </h3>
             </div>
           </div>
           <ol id="clarification-questions" class="clarification-questions-list"></ol>
@@ -580,8 +612,13 @@
         <div id="diag-section" class="result-card future-card" style="display:none;">
           <div class="card-header-flex">
             <div class="card-title-group">
-              <h2 data-i18n="diagnosisTitle">AI Vision &amp; Technical Analysis</h2>
-              <p>Engine: <span id="diag-model-used">See &amp; Solve Vision Intelligence</span></p>
+              <h2 class="heading-with-info">
+                <span data-i18n="diagnosisTitle">AI Vision &amp; Technical Analysis</span>
+                <button type="button" class="ui-info-btn" aria-label="Engine specifications" title="More information">
+                  <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                  <span class="ui-info-popover" role="tooltip">Engine: <span id="diag-model-used">See &amp; Solve Vision Intelligence</span>. Autonomous visual telemetry model calibrated for civic and domestic repairs.</span>
+                </button>
+              </h2>
             </div>
             <div class="severity-badge-container">
               <span id="diag-severity-badge" class="badge badge-moderate">Moderate Risk</span>
@@ -614,7 +651,13 @@
 
           <!-- Symptoms List -->
           <div class="diag-item" style="margin-bottom:0.75rem;">
-            <div class="diag-item-label" data-i18n="symptomsLabel">Visible Symptoms &amp; Clues</div>
+            <div class="diag-item-label">
+              <span data-i18n="symptomsLabel">Visible Symptoms &amp; Clues</span>
+              <button type="button" class="ui-info-btn" aria-label="Symptoms info" title="More information">
+                <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                <span class="ui-info-popover" role="tooltip">Key visual anomalies detected by the AI inspection engine from your uploaded photograph.</span>
+              </button>
+            </div>
             <ul id="diag-symptoms" class="diag-list"></ul>
           </div>
 
@@ -625,7 +668,13 @@
                 <span class="box-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                 </span>
-                <span class="box-title" data-i18n="factsLabel">Observed Facts (Visual Evidence)</span>
+                <span class="box-title">
+                  <span data-i18n="factsLabel">Observed Facts (Visual Evidence)</span>
+                  <button type="button" class="ui-info-btn" aria-label="Observed facts info" title="More information">
+                    <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                    <span class="ui-info-popover" role="tooltip">Empirical attributes directly visible in the image without speculation (e.g., surface stains, physical cracks, water puddles).</span>
+                  </button>
+                </span>
               </div>
               <div id="diag-facts" class="box-content"></div>
             </div>
@@ -635,7 +684,13 @@
                 <span class="box-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                 </span>
-                <span class="box-title" data-i18n="assumptionsLabel">Plausible Causes &amp; Assumptions</span>
+                <span class="box-title">
+                  <span data-i18n="assumptionsLabel">Plausible Causes &amp; Assumptions</span>
+                  <button type="button" class="ui-info-btn" aria-label="Assumptions info" title="More information">
+                    <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                    <span class="ui-info-popover" role="tooltip">Logical technical inferences based on observed symptoms and equipment mechanical history.</span>
+                  </button>
+                </span>
               </div>
               <div id="diag-assumptions" class="box-content"></div>
             </div>
@@ -644,11 +699,22 @@
 
         <!-- Safe Troubleshooting Section -->
         <div id="trouble-section" class="result-card future-card" style="display:none;">
-          <h2 data-i18n="troubleshootingTitle">Safe Step-by-Step Troubleshooting</h2>
-          <p class="section-subtext">Preliminary checklist and safe DIY steps. Stop immediately if any hazard appears.</p>
+          <h2 class="heading-with-info">
+            <span data-i18n="troubleshootingTitle">Safe Step-by-Step Troubleshooting</span>
+            <button type="button" class="ui-info-btn" aria-label="Troubleshooting guidelines" title="More information">
+              <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+              <span class="ui-info-popover" role="tooltip">Preliminary checklist and safe DIY steps. Stop immediately if any electrical, gas, or structural hazard appears.</span>
+            </button>
+          </h2>
 
           <div class="safety-checklist-card">
-            <h4>Preliminary Safety Checklist (Verify before starting):</h4>
+            <h4 class="heading-with-info">
+              <span>Preliminary Safety Checklist</span>
+              <button type="button" class="ui-info-btn" aria-label="Safety checklist info" title="More information">
+                <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                <span class="ui-info-popover" role="tooltip">Mandatory safety precautions to verify before starting work. Disconnect power supplies and shut main water valves.</span>
+              </button>
+            </h4>
             <div id="trouble-checks" class="interactive-checklist"></div>
           </div>
 
@@ -661,8 +727,13 @@
         <div id="video-section" class="result-card future-card" style="display:none;">
           <div class="card-header-flex">
             <div class="card-title-group">
-              <h2 data-i18n="videoTitle">Problem Resolution Video Tutorials</h2>
-              <p class="section-subtext">AI-generated step-by-step visual player with audio narration, plus verified instructional channels.</p>
+              <h2 class="heading-with-info">
+                <span data-i18n="videoTitle">Problem Resolution Video Tutorials</span>
+                <button type="button" class="ui-info-btn" aria-label="Video tutorials info" title="More information">
+                  <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                  <span class="ui-info-popover" role="tooltip">Interactive step-by-step visual canvas with audio narration and verified external instructional channels.</span>
+                </button>
+              </h2>
             </div>
             <div class="video-mode-toggles">
               <button type="button" id="tab-btn-ai-video" class="video-tab-btn active">
@@ -745,8 +816,13 @@
         <div id="tech-section" class="result-card future-card" style="display:none;">
           <div class="card-header-flex">
             <div class="card-title-group">
-              <h2 data-i18n="technicianTitle">Verified Local Technicians</h2>
-              <p id="tech-header-subtitle">Specialization &amp; search area</p>
+              <h2 class="heading-with-info">
+                <span data-i18n="technicianTitle">Verified Local Technicians</span>
+                <button type="button" class="ui-info-btn" aria-label="Technician directory info" title="More information">
+                  <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+                  <span class="ui-info-popover" role="tooltip">Licensed and verified local electricians, plumbers, and mechanics operating across Guntur, Vijayawada, and AP districts. <span id="tech-header-subtitle">Specialization &amp; search area</span></span>
+                </button>
+              </h2>
             </div>
           </div>
           <div id="tech-notice-box" class="video-notice-box" style="display:none;"></div>
@@ -755,10 +831,13 @@
 
         <!-- Government Complaint Section -->
         <div id="gov-section" class="result-card future-card" style="display:none;">
-          <h2 data-i18n="govTitle">Government Complaint Assistance</h2>
-          <p class="section-subtext">
-            This issue belongs to public/municipal civic infrastructure. Use the details below to file a formal complaint with the responsible authority.
-          </p>
+          <h2 class="heading-with-info">
+            <span data-i18n="govTitle">Government Complaint Assistance</span>
+            <button type="button" class="ui-info-btn" aria-label="Government grievance info" title="More information">
+              <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+              <span class="ui-info-popover" role="tooltip">Official civic infrastructure complaint draft for Andhra Pradesh municipal authorities (MeeSeva / MeekoSam / GMC / VMC). Review, copy, or send directly.</span>
+            </button>
+          </h2>
 
           <div id="gov-authority-card" class="gov-authority-box"></div>
 
@@ -786,7 +865,7 @@
         </div>
 
         <!-- Save Report Prompt (for guests) -->
-        <div id="save-report-row" style="display:none; text-align:center; margin-top:1.5rem;">
+        <div id="save-report-row" style="display:none; text-align:center; margin-top:3.5rem; padding:2rem 1.5rem; background:rgba(8,13,25,0.7); border:1px solid var(--border-card); border-radius:var(--radius-lg);">
           <p style="color:var(--gray-700); margin-bottom:0.75rem;">Sign in to save this diagnostic report to your personal history.</p>
           <button type="button" id="btn-save-report" class="submit-btn" style="max-width:320px; margin:0 auto;">Sign In to Save Report</button>
         </div>
@@ -801,8 +880,11 @@
           <h2 style="display:flex; align-items:center; gap:0.6rem; font-size:1.6rem; font-weight:700;">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             <span>My Saved Reports</span>
+            <button type="button" class="ui-info-btn" aria-label="Saved reports info" title="More information">
+              <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+              <span class="ui-info-popover" role="tooltip">View, manage, export, and revisit your past problem diagnosis records. Reports are strictly private to your account.</span>
+            </button>
           </h2>
-          <p>View, manage, and revisit your past problem diagnosis reports.</p>
         </div>
         <div id="reports-list-container"></div>
         <div id="no-reports-notice" style="display:none; text-align:center; padding:2rem; color:var(--gray-500);">
@@ -818,11 +900,14 @@
           <h2 style="display:flex; align-items:center; gap:0.6rem; font-size:1.6rem; font-weight:700;">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Profile &amp; Settings</span>
+            <button type="button" class="ui-info-btn" aria-label="Profile and settings info" title="More information">
+              <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+              <span class="ui-info-popover" role="tooltip">Manage your account authentication, view diagnostic system telemetry, and sign out securely.</span>
+            </button>
           </h2>
-          <p>Manage your account, review system status, and sign out.</p>
         </div>
         <div id="profile-container">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.5rem; margin-bottom:2.25rem;">
             <div class="diag-item">
               <div class="diag-item-label">Name</div>
               <div class="diag-item-value" id="profile-name">—</div>
@@ -839,7 +924,7 @@
 
           <div id="api-health-container" style="margin-bottom:1.5rem;"></div>
 
-          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <div style="display:flex; gap:1.25rem; flex-wrap:wrap; margin-top:1.5rem;">
             <button type="button" id="btn-logout" class="submit-btn" style="background:var(--gray-700); max-width:200px;">Logout</button>
             <button type="button" id="btn-delete-account" class="submit-btn" style="background:var(--danger); max-width:200px;">Delete Account</button>
           </div>
@@ -1043,8 +1128,13 @@
   <div id="forgot-modal" class="modal-overlay">
     <div class="modal-card">
       <button type="button" id="forgot-modal-close" class="modal-close" aria-label="Close">&times;</button>
-      <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:1rem;">Reset Password</h2>
-      <p style="font-size:0.9rem; color:var(--gray-500); margin-bottom:1.25rem;">Enter your email address to request a password reset.</p>
+      <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:1.25rem; display:flex; align-items:center;">
+        <span>Reset Password</span>
+        <button type="button" class="ui-info-btn" aria-label="Password reset help" title="More information">
+          <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
+          <span class="ui-info-popover" role="tooltip">Enter your registered email address to receive secure password recovery instructions.</span>
+        </button>
+      </h2>
       <form id="forgot-form">
         <div class="form-group">
           <label class="form-label" for="forgot-email">Email Address</label>
@@ -1065,8 +1155,8 @@
   </button>
 
   <!-- ===================== SCRIPTS ===================== -->
-  <script src="/js/i18n-client.js?v=3.7.0"></script>
-  <script src="/js/app.js?v=3.7.0"></script>
+  <script src="/js/i18n-client.js?v=3.9.0"></script>
+  <script src="/js/app.js?v=3.9.0"></script>
 
 </body>
 </html>
