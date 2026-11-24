@@ -2402,10 +2402,182 @@
       .replace(/'/g, '&#39;');
   }
 
+  /* =========================================================================
+     CINEMATIC APP REVEAL SPLASH & LOGO MORPH SEQUENCE
+     ========================================================================= */
+  function initAppRevealSplash() {
+    const splash = document.getElementById('app-intro-splash');
+    if (!splash) return;
+
+    const targetBadge = document.getElementById('header-logo-badge') || document.querySelector('.app-header .logo-badge');
+    const badge = document.getElementById('splash-shield-badge');
+    const hud = document.getElementById('splash-hud-container');
+    const textGroup = document.getElementById('splash-text-group');
+    const skipBar = document.getElementById('splash-skip-bar');
+    const canvas = document.getElementById('splash-particle-canvas');
+
+    // Prevent background scrolling while splash is active
+    document.body.style.overflow = 'hidden';
+
+    // Particle Canvas Animation
+    let animId = null;
+    function startParticles() {
+      if (!canvas || !canvas.getContext) return;
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      function onResize() {
+        if (!canvas) return;
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', onResize, { passive: true });
+
+      const particles = [];
+      const count = Math.min(65, Math.max(25, Math.floor(width / 22)));
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          r: Math.random() * 1.6 + 0.6,
+          vx: (Math.random() - 0.5) * 0.45,
+          vy: (Math.random() - 0.5) * 0.45 - 0.2,
+          color: Math.random() > 0.45 ? 'rgba(59, 130, 246, ' : 'rgba(212, 255, 36, ',
+          alpha: Math.random() * 0.65 + 0.2
+        });
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, width, height);
+        for (let j = 0; j < particles.length; j++) {
+          const p = particles[j];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+
+          ctx.fillStyle = p.color + p.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        animId = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    startParticles();
+
+    function startSequence() {
+      let hasMorphed = false;
+
+      function performMorph() {
+        if (hasMorphed) return;
+        hasMorphed = true;
+
+        if (animId) {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+
+        // 1. Dissolve surrounding HUD, text and particles
+        if (hud) hud.classList.add('splash-fade-out');
+        if (textGroup) textGroup.classList.add('splash-fade-out');
+        if (skipBar) skipBar.classList.add('splash-fade-out');
+        if (canvas) canvas.style.opacity = '0';
+
+        // 2. Dissolve dark background to reveal the app layout underneath
+        splash.classList.add('splash-bg-transparent');
+
+        // 3. Compute precise translation and scale to glide directly into the header logo
+        if (targetBadge && badge) {
+          badge.style.animation = 'none';
+
+          const targetRect = targetBadge.getBoundingClientRect();
+          const badgeRect = badge.getBoundingClientRect();
+
+          const deltaX = (targetRect.left + targetRect.width / 2) - (badgeRect.left + badgeRect.width / 2);
+          const deltaY = (targetRect.top + targetRect.height / 2) - (badgeRect.top + badgeRect.height / 2);
+          const scale = targetRect.width / badgeRect.width;
+
+          badge.style.transition = 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s ease, border-radius 0.85s ease';
+          badge.style.transform = 'translate3d(' + deltaX.toFixed(2) + 'px, ' + deltaY.toFixed(2) + 'px, 0) scale(' + scale.toFixed(4) + ')';
+          badge.style.borderRadius = '12px';
+        }
+
+        // 4. Restore scroll, pulse the header logo on arrival, and hide overlay
+        setTimeout(() => {
+          document.body.style.overflow = '';
+          if (targetBadge) {
+            targetBadge.classList.add('logo-arrived-pulse');
+            setTimeout(() => targetBadge.classList.remove('logo-arrived-pulse'), 1000);
+          }
+          splash.classList.add('splash-hidden');
+          splash.style.display = 'none';
+        }, 860);
+      }
+
+      // Natural progression after reveal animation plays (3.0s)
+      const autoTimer = setTimeout(performMorph, 3000);
+
+      function onSkip(e) {
+        clearTimeout(autoTimer);
+        performMorph();
+      }
+
+      splash.addEventListener('click', onSkip, { once: true });
+      window.addEventListener('keydown', onSkip, { once: true });
+
+      // Expose replay
+      window.replayAppIntro = function() {
+        clearTimeout(autoTimer);
+        hasMorphed = false;
+        splash.classList.remove('splash-hidden', 'splash-bg-transparent');
+        splash.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        if (hud) hud.classList.remove('splash-fade-out');
+        if (textGroup) textGroup.classList.remove('splash-fade-out');
+        if (skipBar) skipBar.classList.remove('splash-fade-out');
+        if (canvas) canvas.style.opacity = '0.85';
+
+        if (badge) {
+          badge.style.transform = '';
+          badge.style.transition = '';
+          badge.style.borderRadius = '';
+          badge.style.animation = '';
+        }
+
+        // Force reflow
+        void splash.offsetWidth;
+
+        startParticles();
+        startSequence();
+      };
+    }
+
+    startSequence();
+
+    // Wire footer replay button
+    const btnReplay = document.getElementById('btn-replay-intro');
+    if (btnReplay) {
+      btnReplay.addEventListener('click', () => {
+        if (typeof window.replayAppIntro === 'function') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.replayAppIntro();
+        }
+      });
+    }
+  }
+
   // Initial Boot
   checkSession();
   updateStepper(1);
   initStepperSpotlight();
   initNavNeonLens();
+  initAppRevealSplash();
 
 })();

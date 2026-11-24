@@ -3179,3 +3179,448 @@ html {
     justify-content: center;
   }
 }
+
+/* =========================================================================
+   CINEMATIC APP REVEAL SPLASH & LOGO MORPH ANIMATION
+   ========================================================================= */
+
+.app-intro-splash {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, #081126 0%, #030407 80%);
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+}
+
+.app-intro-splash.splash-bg-transparent {
+  background: transparent !important;
+  pointer-events: none;
+}
+
+.app-intro-splash.splash-hidden {
+  display: none !important;
+}
+
+/* Background Cyber Dust / Stars Canvas */
+.splash-particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
+  transition: opacity 0.5s ease;
+}
+
+/* Ambient Radial Glow */
+.splash-ambient-glow {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(21, 88, 201, 0.35) 0%, rgba(212, 255, 36, 0.08) 45%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 1;
+  animation: splashAuraBreathe 3s ease-in-out infinite alternate;
+}
+
+@keyframes splashAuraBreathe {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+/* HUD Container Framing */
+.splash-hud-container {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+@media (max-width: 480px) {
+  .splash-hud-container {
+    width: 270px;
+    height: 270px;
+  }
+}
+
+/* 4 Corner Viewfinder Brackets */
+.splash-corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: #3B82F6;
+  border-style: solid;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
+  animation: splashCornerIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-corner-tl {
+  top: 0;
+  left: 0;
+  border-width: 3px 0 0 3px;
+  transform: translate(-10px, -10px);
+  animation-delay: 0.1s;
+}
+
+.splash-corner-tr {
+  top: 0;
+  right: 0;
+  border-width: 3px 3px 0 0;
+  transform: translate(10px, -10px);
+  animation-delay: 0.1s;
+}
+
+.splash-corner-bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 3px 3px;
+  transform: translate(-10px, 10px);
+  animation-delay: 0.1s;
+}
+
+.splash-corner-br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 3px 3px 0;
+  transform: translate(10px, 10px);
+  animation-delay: 0.1s;
+}
+
+@keyframes splashCornerIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; transform: translate(0, 0); }
+}
+
+/* HUD Circular Compass Rings */
+.splash-reticle-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: splashReticleFade 1s ease 0.3s forwards;
+}
+
+@keyframes splashReticleFade {
+  to { opacity: 0.85; }
+}
+
+.splash-spin-cw {
+  transform-origin: 150px 150px;
+  animation: splashSpinCw 24s linear infinite;
+}
+
+.splash-spin-ccw {
+  transform-origin: 150px 150px;
+  animation: splashSpinCcw 18s linear infinite;
+}
+
+@keyframes splashSpinCw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes splashSpinCcw {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* Laser Scanline Beam across viewport */
+.splash-laser-scanline {
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  width: 140%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3B82F6, #D4FF24, #3B82F6, transparent);
+  box-shadow: 0 0 16px rgba(212, 255, 36, 0.9), 0 0 30px rgba(59, 130, 246, 0.8);
+  opacity: 0;
+  transform: translateY(-50%) scaleX(0);
+  animation: splashLaserSweep 1.6s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+}
+
+@keyframes splashLaserSweep {
+  0% { opacity: 0; transform: translateY(-50%) scaleX(0); }
+  30% { opacity: 1; transform: translateY(-50%) scaleX(1); }
+  70% { opacity: 0.9; transform: translateY(-50%) scaleX(1); }
+  100% { opacity: 0.2; transform: translateY(-50%) scaleX(0.9); }
+}
+
+/* Central Hero Group */
+.splash-hero-center {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: -15px;
+}
+
+/* The Shield Badge that will morph! */
+.splash-shield-badge {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 36px;
+  background: linear-gradient(135deg, rgba(8, 14, 30, 0.95) 0%, rgba(12, 22, 48, 0.9) 100%);
+  border: 2px solid rgba(21, 88, 201, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 35px rgba(21, 88, 201, 0.5), inset 0 2px 3px rgba(255, 255, 255, 0.25);
+  padding: 8px;
+  transform-origin: center center;
+  will-change: transform, opacity;
+  animation: splashBadgeFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes splashBadgeFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+.splash-shield-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.7));
+}
+
+/* Stroke Dash Tracing Animations (Dual energy beams drawing the shield!) */
+.splash-trace-left-base,
+.splash-trace-left-core {
+  stroke-dasharray: 65;
+  stroke-dashoffset: 65;
+  animation: splashDrawStroke 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+.splash-trace-right-base,
+.splash-trace-right-core {
+  stroke-dasharray: 65;
+  stroke-dashoffset: 65;
+  animation: splashDrawStroke 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+@keyframes splashDrawStroke {
+  0% { stroke-dashoffset: 65; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.splash-trace-left-base {
+  filter: drop-shadow(0 0 6px #1558C9);
+}
+
+.splash-trace-right-base {
+  filter: drop-shadow(0 0 8px #D4FF24);
+}
+
+/* Base Plates & Mesh Fill fade in when strokes complete */
+.splash-plate-base,
+.splash-plate-mesh,
+.splash-specular-shine,
+.splash-inner-bevel,
+.splash-central-seam {
+  opacity: 0;
+  animation: splashFillFadeIn 0.7s ease 1.1s forwards;
+}
+
+@keyframes splashFillFadeIn {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Reticle, aperture & shutter blade animations */
+.splash-reticle-circle {
+  transform-origin: 24px 23.5px;
+  animation: reticleSpin 20s linear infinite;
+}
+
+.splash-shutter-blades {
+  transform-origin: 24px 23.5px;
+  opacity: 0;
+  animation: splashBladesIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+}
+
+@keyframes splashBladesIn {
+  0% { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+  100% { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+/* Pupil & Lens Flare Ignition */
+.splash-pupil {
+  transform-origin: 24px 23.5px;
+  animation: splashPupilIgnite 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes splashPupilIgnite {
+  0% { transform: scale(0.85); filter: drop-shadow(0 0 4px #D4FF24); }
+  100% { transform: scale(1.3); filter: drop-shadow(0 0 16px #D4FF24); }
+}
+
+/* Optical Lens Flare Burst */
+.splash-lens-flare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(212, 255, 36, 0.9) 25%, rgba(59, 130, 246, 0.5) 50%, transparent 75%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  animation: splashFlareFlash 1.1s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+}
+
+@keyframes splashFlareFlash {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  40% { transform: translate(-50%, -50%) scale(1.6); opacity: 1; }
+  80% { transform: translate(-50%, -50%) scale(2); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+/* Typography Group Entrance */
+.splash-text-group {
+  margin-top: 1.5rem;
+  text-align: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: splashTextSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+}
+
+@keyframes splashTextSlideUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.splash-app-title {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 25px rgba(59, 130, 246, 0.4);
+}
+
+.splash-app-subtitle {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+  color: #94A3B8;
+  margin: 0.4rem 0 0 0;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.splash-sys-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(212, 255, 36, 0.1);
+  border: 1px solid rgba(212, 255, 36, 0.35);
+  color: #D4FF24;
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.splash-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #D4FF24;
+  box-shadow: 0 0 8px #D4FF24;
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+/* Skip Bar */
+.splash-skip-bar {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-weight: 600;
+  transition: opacity 0.4s ease, color 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+  animation: splashFadeIn 1s ease 1.8s forwards;
+}
+
+.splash-skip-bar:hover {
+  color: var(--color-lime);
+}
+
+@keyframes splashFadeIn {
+  to { opacity: 0.7; }
+}
+
+/* Fade out helpers during morph */
+.splash-fade-out {
+  opacity: 0 !important;
+  transform: scale(0.9) !important;
+  transition: opacity 0.45s ease, transform 0.45s ease !important;
+}
+
+/* Arrival landing pulse on the header logo */
+.logo-arrived-pulse {
+  animation: headerLogoArrived 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes headerLogoArrived {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(21, 88, 201, 0.3);
+  }
+  30% {
+    transform: scale(1.18);
+    border-color: #D4FF24;
+    box-shadow: 0 0 30px rgba(212, 255, 36, 0.9), inset 0 0 14px rgba(212, 255, 36, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    border-color: rgba(21, 88, 201, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 0 12px rgba(21, 88, 201, 0.3);
+  }
+}
+
+.footer-replay-btn:hover {
+  color: var(--color-lime) !important;
+  text-shadow: 0 0 8px rgba(212, 255, 36, 0.5);
+}
