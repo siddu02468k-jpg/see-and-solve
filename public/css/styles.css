@@ -3802,3 +3802,266 @@ html {
     padding: 0.5rem 0.75rem;
   }
 }
+
+
+/* =========================================================================
+   EMERGENCY FIRST-AID GUIDES & HOTLINE PILLS (OFFLINE READY)
+   ========================================================================= */
+.emergency-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #FCA5A5;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
+  white-space: nowrap;
+}
+
+.emergency-guide-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #EF4444;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+.emergency-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #EF4444;
+  box-shadow: 0 0 8px #EF4444;
+  animation: emergencyPulse 1.6s infinite ease-in-out;
+}
+
+@keyframes emergencyPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 6px #EF4444; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #EF4444; }
+}
+
+/* Emergency Modal & Accordion */
+.emergency-modal-card {
+  max-width: 580px;
+}
+
+.modal-hotlines-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1rem 0 1.25rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.hotline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hotline-pill:hover {
+  transform: scale(1.05);
+}
+
+.hotline-police {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid #3B82F6;
+  color: #93C5FD;
+}
+
+.hotline-electric {
+  background: rgba(234, 179, 8, 0.2);
+  border: 1px solid #EAB308;
+  color: #FEF08A;
+}
+
+.hotline-fire {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #EF4444;
+  color: #FCA5A5;
+}
+
+.emergency-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.emergency-item {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.emergency-item[open] {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.emergency-summary {
+  padding: 0.85rem 1.15rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  user-select: none;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emergency-summary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-lime);
+}
+
+.emergency-body {
+  padding: 0.9rem 1.25rem 1.15rem 1.25rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #CBD5E1;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.emergency-body ol {
+  margin-left: 1.2rem;
+}
+
+.emergency-body li {
+  margin-bottom: 0.45rem;
+}
+
+/* =========================================================================
+   HAZARDOUS SAFETY INTERLOCK & STEP GATING
+   ========================================================================= */
+.hazard-interlock-gate {
+  background: linear-gradient(145deg, rgba(35, 12, 16, 0.95) 0%, rgba(20, 6, 8, 0.92) 100%);
+  border: 1.5px solid #EF4444;
+  border-radius: var(--radius-md);
+  padding: 1.35rem 1.6rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.25);
+  animation: cardFadeUp 0.35s ease-out;
+}
+
+.interlock-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.interlock-icon-pulse {
+  font-size: 1.75rem;
+  line-height: 1;
+  animation: emergencyPulse 1.4s infinite ease-in-out;
+}
+
+.interlock-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #F87171;
+  margin-bottom: 0.25rem;
+}
+
+.interlock-subtitle {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #CBD5E1;
+}
+
+.emergency-hotlines-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1.15rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-sm);
+}
+
+.hotlines-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.interlock-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #FCA5A5;
+  cursor: pointer;
+  user-select: none;
+}
+
+.interlock-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15rem;
+  accent-color: #EF4444;
+  cursor: pointer;
+}
+
+/* When interlock is locked, steps are blurred */
+.step-list.interlock-locked {
+  filter: blur(4px);
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+/* =========================================================================
+   1-CLICK WHATSAPP CIVIC FILING BUTTON
+   ========================================================================= */
+.btn-gov-whatsapp {
+  background: #25D366 !important;
+  color: #030407 !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-gov-whatsapp:hover {
+  background: #20BA5A !important;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5) !important;
+  color: #000000 !important;
+}
+
+/* Secondary Photo Container */
+.secondary-photo-sector {
+  background: rgba(8, 14, 28, 0.65);
+  border: 1px dashed rgba(59, 130, 246, 0.35);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  transition: border-color 0.2s ease;
+}
+
+.secondary-photo-sector:hover {
+  border-color: rgba(59, 130, 246, 0.7);
+}

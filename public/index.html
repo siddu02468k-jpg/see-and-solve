@@ -99,7 +99,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="/css/styles.css?v=3.9.0">
+  <link rel="stylesheet" href="/css/styles.css?v=3.10.0">
 </head>
 <body>
 
@@ -303,6 +303,10 @@
       </nav>
 
       <div class="header-actions">
+        <button type="button" id="btn-emergency-guide" class="emergency-guide-btn" title="Offline Emergency First-Aid Protocol" aria-label="Emergency First-Aid">
+          <span class="emergency-pulse-dot" aria-hidden="true"></span>
+          <span class="emergency-btn-text">🚨 Emergency Guides</span>
+        </button>
         <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Dark/Light Mode">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
         </button>
@@ -426,6 +430,25 @@
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                   <span>Remove</span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Optional Secondary Detail / Macro Photograph Slot -->
+            <div class="secondary-photo-sector" style="margin-top: 1.25rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                <span class="field-hint" style="margin:0; font-weight:600; color:var(--text-muted); font-size:0.84rem;">
+                  🔬 Multi-Angle Inspection: Macro / Detail Shot (Optional)
+                </span>
+                <button type="button" id="btn-toggle-secondary-photo" class="btn-overlay" style="background:rgba(21,88,201,0.22); border:1px solid rgba(59,130,246,0.45); color:#93C5FD; font-size:0.8rem; padding:0.35rem 0.75rem; border-radius:var(--radius-sm); cursor:pointer;">
+                  + Add Close-up / Label
+                </button>
+              </div>
+              <input type="file" id="secondary-image-file-input" accept="image/*" style="display:none;">
+              <div id="secondary-image-preview-wrapper" class="image-preview-wrapper" style="display:none; max-height:220px; margin-top:0.6rem;">
+                <img id="secondary-image-preview" alt="Close-up macro detail photograph preview" style="max-height:220px;">
+                <div class="image-preview-actions">
+                  <button type="button" id="btn-remove-secondary-image" class="btn-overlay">Remove Macro</button>
+                </div>
               </div>
             </div>
           </div>
@@ -718,6 +741,27 @@
             <div id="trouble-checks" class="interactive-checklist"></div>
           </div>
 
+          <!-- Hazardous Activity Safety Interlock & Instant Hotlines -->
+          <div id="hazard-interlock-gate" class="hazard-interlock-gate" style="display:none;">
+            <div class="interlock-header">
+              <div class="interlock-icon-pulse">⚠️</div>
+              <div>
+                <div class="interlock-title">High-Hazard Activity Safety Interlock</div>
+                <div class="interlock-subtitle">This issue involves high-voltage electrical, combustible gas, or structural hazards. DIY work without licensed isolation is strictly prohibited.</div>
+              </div>
+            </div>
+            <div class="emergency-hotlines-row">
+              <span class="hotlines-label">Instant Emergency Hotlines:</span>
+              <a href="tel:112" class="hotline-pill hotline-police">🚨 112 (National Emergency)</a>
+              <a href="tel:1912" class="hotline-pill hotline-electric">⚡ 1912 (Electricity Board)</a>
+              <a href="tel:101" class="hotline-pill hotline-fire">🚒 101 (Fire &amp; Rescue)</a>
+            </div>
+            <label class="interlock-checkbox-label">
+              <input type="checkbox" id="chk-hazard-acknowledge">
+              <span>I confirm I will NOT touch live high-voltage or hazardous gas components without licensed professional clearance.</span>
+            </label>
+          </div>
+
           <div class="steps-heading">Resolution Procedure:</div>
           <div id="trouble-steps" class="step-list"></div>
           <div id="trouble-stop-box" class="stop-warning-box"></div>
@@ -849,6 +893,10 @@
           </div>
 
           <div class="gov-actions-row">
+            <a id="btn-open-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="btn-action-gov btn-gov-whatsapp" style="background:#25D366; color:#030407; text-decoration:none; font-weight:700;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.055-1.954-.486-1.554-.638-2.582-2.222-2.66-2.327-.078-.105-.634-.847-.634-1.617 0-.77.399-1.15.542-1.307.143-.157.312-.197.416-.197.104 0 .208.002.3.007.098.005.228-.037.357.273.13.312.443 1.08.482 1.16.039.08.065.174.013.278-.052.104-.078.17-.156.261-.078.092-.163.204-.234.274-.078.077-.16.16-.068.318.092.158.408.674.876 1.091.602.536 1.109.702 1.267.78.158.078.25.068.343-.039.093-.107.399-.464.505-.623.106-.159.213-.133.359-.079.146.054.925.436 1.084.515.159.079.266.118.305.184.039.066.039.382-.105.787z"/></svg>
+              <span>1-Tap WhatsApp Grievance</span>
+            </a>
             <button type="button" id="btn-copy-email" class="btn-action-gov" style="background:var(--gray-800); color:white;">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               <span>Copy Complaint Draft</span>
@@ -1155,8 +1203,91 @@
   </button>
 
   <!-- ===================== SCRIPTS ===================== -->
-  <script src="/js/i18n-client.js?v=3.9.0"></script>
-  <script src="/js/app.js?v=3.9.0"></script>
+  <script src="/js/i18n-client.js?v=3.10.0"></script>
+  <script src="/js/app.js?v=3.10.0"></script>
 
+  <!-- ===================== EMERGENCY FIRST-AID MODAL (OFFLINE READY) ===================== -->
+  <div id="emergency-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="emergency-modal-title">
+    <div class="modal-card emergency-modal-card">
+      <button type="button" class="modal-close" id="btn-close-emergency-modal" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <h3 id="emergency-modal-title" style="display:flex; align-items:center; gap:0.5rem; color:#EF4444; font-size:1.35rem; font-weight:800;">
+          <span>🚨 Emergency First-Aid Protocol</span>
+        </h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
+          Instant offline guides for critical home emergencies. Works with or without active internet.
+        </p>
+      </div>
+
+      <!-- Quick Emergency Hotline Strip -->
+      <div class="modal-hotlines-strip">
+        <a href="tel:112" class="hotline-pill hotline-police">🚨 112 (National Emergency)</a>
+        <a href="tel:1912" class="hotline-pill hotline-electric">⚡ 1912 (Electricity Board)</a>
+        <a href="tel:101" class="hotline-pill hotline-fire">🚒 101 (Fire &amp; Rescue)</a>
+      </div>
+
+      <div class="emergency-accordion">
+        <details class="emergency-item" open>
+          <summary class="emergency-summary">
+            <span class="emergency-icon">🚰</span>
+            <strong>Indoor Pipe Burst / Flooding (Isolate Water in 30s)</strong>
+          </summary>
+          <div class="emergency-body">
+            <ol>
+              <li>Locate your <strong>Main Water Isolation Valve</strong> (usually near the water meter, main overhead tank outlet, or under the kitchen sink).</li>
+              <li>Turn the valve clockwise (lever perpendicular to the pipe) until fully tight.</li>
+              <li>Turn on all lowest taps (e.g. garden or bathroom) to bleed residual line pressure into a drain.</li>
+              <li>Keep all electrical appliances and extension cords off the wet floor.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="emergency-item">
+          <summary class="emergency-summary">
+            <span class="emergency-icon">⚡</span>
+            <strong>Tripped MCB / Burning Electrical Smell</strong>
+          </summary>
+          <div class="emergency-body">
+            <ol>
+              <li>Do <strong>NOT</strong> repeatedly flip the breaker back on if it instantly snaps down.</li>
+              <li>Unplug all appliances plugged into that specific room/circuit.</li>
+              <li>Inspect wall outlets for black scorch marks, buzzing sounds, or warmth.</li>
+              <li>Flip the breaker up once. If it stays on, plug appliances in one-by-one to identify the faulty device. If it trips with everything unplugged, call <strong>1912</strong> or a licensed electrician.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="emergency-item">
+          <summary class="emergency-summary">
+            <span class="emergency-icon">⛽</span>
+            <strong>Suspected Gas Leak (LPG / Piped Gas)</strong>
+          </summary>
+          <div class="emergency-body">
+            <ol>
+              <li><strong>NEVER</strong> turn electrical switches ON or OFF (sparks can ignite gas).</li>
+              <li>Do NOT light matches, lighters, or use a mobile phone inside the room.</li>
+              <li>Immediately turn the cylinder brass regulator valve to the <strong>OFF</strong> position.</li>
+              <li>Open all doors and windows wide for cross-ventilation. Evacuate everyone outside immediately.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="emergency-item">
+          <summary class="emergency-summary">
+            <span class="emergency-icon">🔌</span>
+            <strong>Active Electric Shock Victim First-Aid</strong>
+          </summary>
+          <div class="emergency-body">
+            <ol>
+              <li><strong>DO NOT TOUCH THE VICTIM</strong> directly with your bare hands.</li>
+              <li>Immediately shut off the main electrical breaker if reachable.</li>
+              <li>If the breaker cannot be reached, use a dry, non-conductive object (wooden broom handle, plastic pipe, rolled newspaper) to push the wire or victim away.</li>
+              <li>Call <strong>112</strong> immediately and check breathing.</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

@@ -11,6 +11,8 @@
   let currentReportData = null;
   let currentImageBase64 = null;
   let currentMimeType = null;
+  let currentSecondaryImageBase64 = null;
+  let currentSecondaryMimeType = null;
   let speechRecognition = null;
   let isRecordingVoice = false;
 
@@ -57,12 +59,20 @@
     forgotForm: document.getElementById('forgot-form'),
     langSelector: document.getElementById('global-lang-select'),
     themeToggleBtn: document.getElementById('theme-toggle-btn'),
+    btnEmergencyGuide: document.getElementById('btn-emergency-guide'),
+    emergencyModal: document.getElementById('emergency-modal'),
+    btnCloseEmergencyModal: document.getElementById('btn-close-emergency-modal'),
     resultsQuickNav: document.getElementById('results-quick-nav'),
     btnScrollTop: document.getElementById('btn-scroll-top'),
 
     // Problem Submission Form
     problemForm: document.getElementById('problem-form'),
     imageInput: document.getElementById('image-file-input'),
+    secondaryImageFileInput: document.getElementById('secondary-image-file-input'),
+    btnToggleSecondaryPhoto: document.getElementById('btn-toggle-secondary-photo'),
+    secondaryImagePreviewWrapper: document.getElementById('secondary-image-preview-wrapper'),
+    secondaryImagePreview: document.getElementById('secondary-image-preview'),
+    btnRemoveSecondaryImage: document.getElementById('btn-remove-secondary-image'),
     dropzone: document.getElementById('upload-dropzone'),
     btnOpenCameraModal: document.getElementById('btn-open-camera-modal'),
     btnBrowseFile: document.getElementById('btn-browse-file'),
@@ -109,6 +119,8 @@
 
     // Troubleshooting Section
     troubleSection: document.getElementById('trouble-section'),
+    hazardInterlockGate: document.getElementById('hazard-interlock-gate'),
+    chkHazardAcknowledge: document.getElementById('chk-hazard-acknowledge'),
     troubleChecks: document.getElementById('trouble-checks'),
     troubleSteps: document.getElementById('trouble-steps'),
     troubleStop: document.getElementById('trouble-stop-box'),
@@ -154,6 +166,7 @@
     govBodyTextarea: document.getElementById('gov-email-body'),
     btnCopyEmail: document.getElementById('btn-copy-email'),
     btnOpenMailto: document.getElementById('btn-open-mailto'),
+    btnOpenWhatsapp: document.getElementById('btn-open-whatsapp'),
     btnOpenPortal: document.getElementById('btn-open-portal'),
     saveReportRow: document.getElementById('save-report-row'),
     btnSaveReport: document.getElementById('btn-save-report'),
@@ -914,6 +927,63 @@
     });
   }
 
+  // Secondary Macro / Detail Photo Handler
+  if (els.btnToggleSecondaryPhoto && els.secondaryImageFileInput) {
+    els.btnToggleSecondaryPhoto.addEventListener('click', () => {
+      els.secondaryImageFileInput.click();
+    });
+  }
+
+  if (els.secondaryImageFileInput) {
+    els.secondaryImageFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPEG, PNG, WebP).');
+        return;
+      }
+      currentSecondaryMimeType = file.type;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        currentSecondaryImageBase64 = ev.target.result;
+        if (els.secondaryImagePreview) els.secondaryImagePreview.src = currentSecondaryImageBase64;
+        if (els.secondaryImagePreviewWrapper) els.secondaryImagePreviewWrapper.style.display = 'block';
+        if (els.btnToggleSecondaryPhoto) els.btnToggleSecondaryPhoto.textContent = '✓ Macro Detail Added';
+        showToast('✓ Multi-angle close-up photo attached!');
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (els.btnRemoveSecondaryImage) {
+    els.btnRemoveSecondaryImage.addEventListener('click', () => {
+      currentSecondaryImageBase64 = null;
+      currentSecondaryMimeType = null;
+      if (els.secondaryImagePreview) els.secondaryImagePreview.src = '';
+      if (els.secondaryImagePreviewWrapper) els.secondaryImagePreviewWrapper.style.display = 'none';
+      if (els.secondaryImageFileInput) els.secondaryImageFileInput.value = '';
+      if (els.btnToggleSecondaryPhoto) els.btnToggleSecondaryPhoto.textContent = '+ Add Close-up / Label';
+    });
+  }
+
+  // Offline Emergency First-Aid Modal Controller
+  if (els.btnEmergencyGuide && els.emergencyModal) {
+    els.btnEmergencyGuide.addEventListener('click', () => {
+      els.emergencyModal.classList.add('active');
+    });
+  }
+
+  if (els.btnCloseEmergencyModal && els.emergencyModal) {
+    els.btnCloseEmergencyModal.addEventListener('click', () => {
+      els.emergencyModal.classList.remove('active');
+    });
+    els.emergencyModal.addEventListener('click', (e) => {
+      if (e.target === els.emergencyModal) {
+        els.emergencyModal.classList.remove('active');
+      }
+    });
+  }
+
   // =========================================================================
   // QUICK SAMPLE PRESETS
   // =========================================================================
@@ -1162,6 +1232,8 @@
           description,
           imageBase64: currentImageBase64,
           mimeType: currentMimeType,
+          secondaryImageBase64: currentSecondaryImageBase64,
+          secondaryMimeType: currentSecondaryMimeType,
           location,
           coordinates: window.lastKnownCoords || null,
           language,
@@ -1413,6 +1485,29 @@
         els.troubleSteps.appendChild(item);
       });
 
+      // Hazard Safety Interlock Gate
+      const isHazardous = (ai.severity === 'Hazardous' || ai.severity === 'High' || ai.is_suitable_for_safe_troubleshooting === false);
+      if (els.hazardInterlockGate) {
+        if (isHazardous) {
+          els.hazardInterlockGate.style.display = 'block';
+          if (els.chkHazardAcknowledge) {
+            els.chkHazardAcknowledge.checked = false;
+            els.troubleSteps.classList.add('interlock-locked');
+            els.chkHazardAcknowledge.onchange = () => {
+              if (els.chkHazardAcknowledge.checked) {
+                els.troubleSteps.classList.remove('interlock-locked');
+                showToast('Safety acknowledged. Proceed with extreme caution.');
+              } else {
+                els.troubleSteps.classList.add('interlock-locked');
+              }
+            };
+          }
+        } else {
+          els.hazardInterlockGate.style.display = 'none';
+          els.troubleSteps.classList.remove('interlock-locked');
+        }
+      }
+
       // Stop condition
       els.troubleStop.innerHTML = `<strong style="display:inline-flex; align-items:center; gap:0.35rem; color:var(--danger);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Critical Stop Threshold:</strong> ${escapeHtml(tb.whenToStop || 'If symptoms persist or require specialized tools.')}`;
     } else {
@@ -1588,6 +1683,11 @@
         };
 
         els.btnOpenMailto.href = `mailto:${encodeURIComponent(draft.recipientEmail || '')}?subject=${encodeURIComponent(els.govSubjectInput.value)}&body=${encodeURIComponent(els.govBodyTextarea.value)}`;
+
+        if (els.btnOpenWhatsapp) {
+          const waMsg = draft.whatsappMessage || `🚨 *PUBLIC CIVIC GRIEVANCE REPORT*\n*Authority:* ${auth?.name || 'Municipal Department'}\n*Issue:* ${els.govSubjectInput.value}\n*Details:* ${els.govBodyTextarea.value}`;
+          els.btnOpenWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMsg)}`;
+        }
 
         els.btnOpenPortal.onclick = () => {
           window.open(auth?.portalUrl || 'https://meekosam.ap.gov.in', '_blank');

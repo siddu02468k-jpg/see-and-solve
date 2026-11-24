@@ -158,6 +158,18 @@ function generatePersonalizedComplaintDraft({
   const mailtoRecipient = officialEmail || '';
   const mailtoUrl = `mailto:${encodeURIComponent(mailtoRecipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
+  // WhatsApp formatted complaint message
+  const whatsappMessage = `🚨 *PUBLIC CIVIC GRIEVANCE REPORT*\n` +
+    `*Authority:* ${deptName}\n` +
+    `*Location:* ${cleanLocation}\n` +
+    `*Issue:* ${issueTitle || 'Civic Infrastructure Problem'}\n` +
+    `*Infrastructure:* ${affectedObject || 'Public Asset'}\n` +
+    `*Citizen Note:* ${userDescription || 'Inspection requested'}\n\n` +
+    `_Formal tracking requested under Citizen's Charter._\n` +
+    `_Generated via See & Solve Civic Redressal Portal_`;
+
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappMessage)}`;
+
   return {
     subject,
     recipientEmail: officialEmail,
@@ -167,9 +179,13 @@ function generatePersonalizedComplaintDraft({
     tollFreeHelpline: tollFree,
     isEmailVerified: Boolean(officialEmail),
     mailtoUrl,
+    whatsappUrl,
+    whatsappMessage,
     actions: {
       canMailto: true,
+      canWhatsApp: true,
       mailtoUrl,
+      whatsappUrl,
       portalUrl,
       canCopy: true
     }

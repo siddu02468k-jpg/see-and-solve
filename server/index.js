@@ -580,6 +580,21 @@ async function handleRequest(req, res) {
         }
       }
 
+      // Handle secondary detail/macro image if provided
+      let savedSecondaryImagePath = null;
+      if (data.secondaryImageBase64) {
+        try {
+          const match2 = data.secondaryImageBase64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          const base64Data2 = match2 ? match2[2] : data.secondaryImageBase64;
+          const ext2 = match2 && match2[1].includes('png') ? '.png' : '.jpg';
+          const filename2 = `report_sec_${Date.now()}_${crypto.randomBytes(4).toString('hex')}${ext2}`;
+          savedSecondaryImagePath = path.join(UPLOADS_DIR, filename2);
+          fs.writeFileSync(savedSecondaryImagePath, Buffer.from(base64Data2, 'base64'));
+        } catch (e) {
+          console.warn('Failed to save secondary image file:', e.message);
+        }
+      }
+
       const user = getAuthUser(req);
       const language = data.language || user?.preferred_language || 'en';
       const location = sanitizeString(data.location || '', 200);
@@ -599,6 +614,9 @@ async function handleRequest(req, res) {
         imagePath: savedImagePath,
         imageBase64: data.imageBase64,
         mimeType: data.mimeType,
+        secondaryImagePath: savedSecondaryImagePath,
+        secondaryImageBase64: data.secondaryImageBase64,
+        secondaryMimeType: data.secondaryMimeType,
         description,
         language,
         location,

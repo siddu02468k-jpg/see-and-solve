@@ -6,7 +6,7 @@ const fs = require('node:fs');
  * When key is not provided or on network/API fallback, uses the verified Domain Diagnostic Engine.
  */
 
-async function analyzeProblem({ imagePath, imageBase64, mimeType, description, language = 'en', location = '', clarificationAnswer = null }) {
+async function analyzeProblem({ imagePath, imageBase64, mimeType, secondaryImagePath, secondaryImageBase64, secondaryMimeType, description, language = 'en', location = '', clarificationAnswer = null }) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (apiKey && apiKey.trim().length > 0) {
@@ -16,6 +16,9 @@ async function analyzeProblem({ imagePath, imageBase64, mimeType, description, l
         imagePath,
         imageBase64,
         mimeType: mimeType || 'image/jpeg',
+        secondaryImagePath,
+        secondaryImageBase64,
+        secondaryMimeType: secondaryMimeType || 'image/jpeg',
         description,
         language,
         location,
@@ -33,6 +36,7 @@ async function analyzeProblem({ imagePath, imageBase64, mimeType, description, l
   return runDomainDiagnosticEngine({
     description,
     imagePath,
+    secondaryImagePath,
     language,
     location,
     clarificationAnswer
@@ -42,10 +46,15 @@ async function analyzeProblem({ imagePath, imageBase64, mimeType, description, l
 /**
  * Live Google Gemini Multimodal Vision API Call
  */
-async function callGeminiVisionAPI({ apiKey, imagePath, imageBase64, mimeType, description, language, location, clarificationAnswer }) {
+async function callGeminiVisionAPI({ apiKey, imagePath, imageBase64, mimeType, secondaryImagePath, secondaryImageBase64, secondaryMimeType, description, language, location, clarificationAnswer }) {
   let base64Data = imageBase64;
   if (!base64Data && imagePath && fs.existsSync(imagePath)) {
     base64Data = fs.readFileSync(imagePath).toString('base64');
+  }
+
+  let secondaryBase64 = secondaryImageBase64;
+  if (!secondaryBase64 && secondaryImagePath && fs.existsSync(secondaryImagePath)) {
+    secondaryBase64 = fs.readFileSync(secondaryImagePath).toString('base64');
   }
 
   const systemPrompt = `You are See & Solve's expert multimodal technical diagnostic and civic infrastructure classifier.
@@ -89,6 +98,15 @@ The JSON must adhere to this exact schema:
       inlineData: {
         mimeType: mimeType || 'image/jpeg',
         data: base64Data
+      }
+    });
+  }
+
+  if (secondaryBase64) {
+    parts.push({
+      inlineData: {
+        mimeType: secondaryMimeType || 'image/jpeg',
+        data: secondaryBase64
       }
     });
   }
