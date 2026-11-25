@@ -83,7 +83,7 @@ The JSON must adhere to this exact schema:
   "location_required": true | false,
   "needs_clarification": true | false,
   "follow_up_questions": ["Question 1", "Question 2"],
-  "required_technician_specialization": "Plumber | Qualified electrician | Computer or laptop technician | Washing-machine repair technician | AC service technician | Automotive mechanic | Public Authority First | null",
+  "required_technician_specialization": "Plumber | Qualified electrician | Computer or laptop technician | Washing-machine repair technician | Air conditioning and cooling | Automotive mechanic | Public Authority First | null",
   "tutorial_search_query": "Targeted YouTube search query using exact object + symptom + repair procedure",
   "recommended_tutorial_type": "Description of tutorial"
 }`;
@@ -471,7 +471,175 @@ function runDomainDiagnosticEngine({ description, language, location, clarificat
     };
   }
 
-  // 9. Default General Diagnostic
+  // 9. Air Conditioning, Refrigerator & Cooling Appliances
+  if (/\bac\b/.test(text) || text.includes('air condition') || text.includes('refrigerator') || text.includes('fridge') || text.includes('freezer') || text.includes('not cooling')) {
+    const isFridge = text.includes('fridge') || text.includes('refrigerator') || text.includes('freezer');
+    return {
+      likely_issue: isFridge ? "Refrigerator insufficient cooling / thermostat or compressor fault" : "Air conditioner not cooling / airflow or refrigerant issue",
+      affected_asset_or_service: isFridge ? "Domestic refrigerator" : "Split / Window air conditioning unit",
+      symptoms_observed: ["Unit running without effective cooling", "Warm air or frost buildup", "Possible drain water drip"],
+      facts: ["Cooling appliance requires inspection of filters, coils, or compressor circuit"],
+      assumptions: ["Clogged dust filter, dirty condenser coil, thermostat miscalibration, or refrigerant leak"],
+      technical_category: "Air conditioning and cooling",
+      severity: "Moderate",
+      is_suitable_for_safe_troubleshooting: true,
+      troubleshooting_steps: [
+        { step: 1, instruction: isFridge ? "Verify the thermostat dial is not accidentally set to minimum or defrost mode, and inspect door rubber gasket seals." : "Switch off power, open the indoor AC front panel, and wash dust off the removable mesh filters with clean water.", expected_outcome: "Restores normal airflow or thermostat operation." },
+        { step: 2, instruction: "Ensure at least 15 cm clearance around the condenser coils/outdoor unit for proper heat exhaust.", expected_outcome: "Prevents thermal compressor tripping." }
+      ],
+      safe_preliminary_checks: [
+        "Turn off the appliance isolator switch before cleaning filters.",
+        "Do not puncture evaporator fins or tamper with pressurized refrigerant copper pipes."
+      ],
+      when_to_stop: "If cooling still fails after cleaning filters and resetting the circuit, refrigerant pressure or compressor electronics require a certified AC/refrigeration technician.",
+      is_government_related: false,
+      public_or_private_ownership: "private",
+      likely_responsible_department: null,
+      classification_reason: "Household cooling appliances are private personal property.",
+      confidence: 0.91,
+      location_required: false,
+      needs_clarification: false,
+      follow_up_questions: [],
+      required_technician_specialization: "Air conditioning and cooling",
+      tutorial_search_query: isFridge ? "refrigerator not cooling troubleshooting steps" : "split ac not cooling filter cleaning troubleshooting",
+      recommended_tutorial_type: isFridge ? "Refrigerator basic cooling inspection" : "AC air filter cleaning and thermostat checks",
+      ai_model_used: "See & Solve Domain Diagnostic Engine"
+    };
+  }
+
+  // 10. General Domestic Electrical (Fan, Switch, Light, Inverter, Wiring, Geyser)
+  if (text.includes('electric') || text.includes('fan') || text.includes('switch') || text.includes('socket') || text.includes('bulb') || text.includes('tube light') || text.includes('inverter') || text.includes('wiring') || text.includes('geyser') || text.includes('mcb') || text.includes('power')) {
+    return {
+      likely_issue: "Household electrical fixture / switchboard or power connection fault",
+      affected_asset_or_service: "Domestic electrical circuit / appliance connection",
+      symptoms_observed: ["Fixture or outlet not receiving steady power", "Possible loose switch contact or tripped breaker"],
+      facts: ["Electrical component or branch circuit requires safe isolation and inspection"],
+      assumptions: ["Tripped MCB breaker, worn switch contacts, failed capacitor (for ceiling fans), or loose terminal connection"],
+      technical_category: "Electrical equipment",
+      severity: "Moderate",
+      is_suitable_for_safe_troubleshooting: true,
+      troubleshooting_steps: [
+        { step: 1, instruction: "Inspect your home main distribution board (DB) to see if an MCB or RCCB switch has tripped to the OFF position.", expected_outcome: "Identifies branch overload or breaker trip." },
+        { step: 2, instruction: "Test the wall outlet with a known working lamp or phone charger to confirm whether the issue is the wall socket or the connected device.", expected_outcome: "Isolates socket fault from appliance fault." }
+      ],
+      safe_preliminary_checks: [
+        "Never open live switchboards without turning off the Main Isolator and verifying zero voltage.",
+        "Wear dry rubber-soled footwear when checking distribution panels."
+      ],
+      when_to_stop: "If the breaker immediately trips again upon resetting or you detect heat/odor, stop immediately and hire a qualified electrician.",
+      is_government_related: false,
+      public_or_private_ownership: "private",
+      likely_responsible_department: null,
+      classification_reason: "Internal residential wiring and fixtures are private homeowner responsibility.",
+      confidence: 0.90,
+      location_required: false,
+      needs_clarification: false,
+      follow_up_questions: [],
+      required_technician_specialization: "Qualified electrician",
+      tutorial_search_query: "ceiling fan or switchboard troubleshooting home electrical safety",
+      recommended_tutorial_type: "Basic MCB breaker and outlet isolation check",
+      ai_model_used: "See & Solve Domain Diagnostic Engine"
+    };
+  }
+
+  // 11. Domestic Plumbing (Tap, Toilet, Flush, Bathroom Pipe, Water Motor)
+  if (text.includes('tap') || text.includes('faucet') || text.includes('toilet') || text.includes('flush') || text.includes('bathroom') || text.includes('shower') || text.includes('plumb') || (isPipeMentioned && hasPrivateContext)) {
+    return {
+      likely_issue: "Household plumbing leak / fixture or valve malfunction",
+      affected_asset_or_service: "Domestic water tap, valve, or drainage fitting",
+      symptoms_observed: ["Water dripping or leaking at residential fixture", "Reduced flow or faulty valve shutoff"],
+      facts: ["Internal residential plumbing fitting requires washer, cartridge, or seal service"],
+      assumptions: ["Worn rubber O-ring, loose PTFE thread tape, or calcified ceramic tap cartridge"],
+      technical_category: "Plumbing",
+      severity: "Low",
+      is_suitable_for_safe_troubleshooting: true,
+      troubleshooting_steps: [
+        { step: 1, instruction: "Close the local angle stop valve beneath the sink/fixture (turn clockwise) to stop water wastage.", expected_outcome: "Isolates the leaking fixture from water pressure." },
+        { step: 2, instruction: "Check for loose compression nuts or worn rubber washers around the tap spindle.", expected_outcome: "Identifies simple seal replacement opportunity." }
+      ],
+      safe_preliminary_checks: ["Keep a cloth and bucket ready before loosening any plumbing union or valve."],
+      when_to_stop: "If the main shutoff valve fails to hold or the leak originates inside a concealed wall pipe, call a licensed plumber.",
+      is_government_related: false,
+      public_or_private_ownership: "private",
+      likely_responsible_department: null,
+      classification_reason: "Internal bathroom and kitchen plumbing fixtures are private domestic assets.",
+      confidence: 0.92,
+      location_required: false,
+      needs_clarification: false,
+      follow_up_questions: [],
+      required_technician_specialization: "Plumber",
+      tutorial_search_query: "how to fix leaking tap cartridge or bathroom pipe",
+      recommended_tutorial_type: "Residential tap and valve maintenance",
+      ai_model_used: "See & Solve Domain Diagnostic Engine"
+    };
+  }
+
+  // 12. Automotive / Vehicle (Car, Bike, Scooter, Engine, Tyre)
+  if (text.includes('car') || text.includes('bike') || text.includes('scooter') || text.includes('motorcycle') || text.includes('vehicle') || text.includes('engine') || text.includes('tyre') || text.includes('tire') || text.includes('mechanic')) {
+    return {
+      likely_issue: "Vehicle mechanical / starting or tyre breakdown",
+      affected_asset_or_service: "Private automotive vehicle (Car / Two-wheeler)",
+      symptoms_observed: ["Vehicle failing to start, rough running, or mechanical issue"],
+      facts: ["Personal motor vehicle requires mechanical or electrical battery inspection"],
+      assumptions: ["Discharged 12V starter battery, fouled spark plug, fuel delivery issue, or tyre puncture"],
+      technical_category: "Automotive mechanics",
+      severity: "Moderate",
+      is_suitable_for_safe_troubleshooting: true,
+      troubleshooting_steps: [
+        { step: 1, instruction: "Ensure the vehicle is parked safely on level ground with hazard lights on and parking brake engaged.", expected_outcome: "Secures vehicle from traffic hazards." },
+        { step: 2, instruction: "Check battery terminal tightness (corrosion/loose clamps) and verify fuel level and kill-switch position.", expected_outcome: "Rules out common ignition lockouts." }
+      ],
+      safe_preliminary_checks: ["Never open a hot radiator cap while the engine is still warm."],
+      when_to_stop: "If the starter clicks without cranking or warning lights persist, contact a local automotive mechanic.",
+      is_government_related: false,
+      public_or_private_ownership: "private",
+      likely_responsible_department: null,
+      classification_reason: "Private motor vehicles are privately owned equipment.",
+      confidence: 0.89,
+      location_required: false,
+      needs_clarification: false,
+      follow_up_questions: [],
+      required_technician_specialization: "Automotive mechanic",
+      tutorial_search_query: "car or bike not starting basic battery and ignition checks",
+      recommended_tutorial_type: "Safe roadside battery and ignition inspection",
+      ai_model_used: "See & Solve Domain Diagnostic Engine"
+    };
+  }
+
+  // 13. Other Home Electronics / Appliances (TV, Microwave, Printer, Phone, Mixer)
+  if (text.includes('tv') || text.includes('television') || text.includes('microwave') || text.includes('oven') || text.includes('mixer') || text.includes('grinder') || text.includes('purifier') || /\bro\b/.test(text) || text.includes('printer') || text.includes('phone') || text.includes('mobile')) {
+    const isIT = text.includes('printer') || text.includes('phone') || text.includes('mobile');
+    return {
+      likely_issue: "Consumer electronics / domestic appliance malfunction",
+      affected_asset_or_service: "Household electronic device or appliance",
+      symptoms_observed: ["Device unresponsive, power fault, or abnormal operation"],
+      facts: ["Electronic/appliance fault reported by user"],
+      assumptions: ["Power adapter failure, internal thermal fuse blown, or control board fault"],
+      technical_category: isIT ? "Computer or laptop hardware" : "Household appliances",
+      severity: "Low",
+      is_suitable_for_safe_troubleshooting: true,
+      troubleshooting_steps: [
+        { step: 1, instruction: "Verify the wall power socket works with another device and inspect the power cord for visible bends or loose plugs.", expected_outcome: "Confirms external power delivery." },
+        { step: 2, instruction: "Power cycle the device by unplugging it for 60 seconds before reconnecting.", expected_outcome: "Resets stuck microcontroller logic." }
+      ],
+      safe_preliminary_checks: ["Do not open microwave enclosures—high-voltage capacitors retain lethal charge even when unplugged."],
+      when_to_stop: "If power cycling fails, contact a certified local technician.",
+      is_government_related: false,
+      public_or_private_ownership: "private",
+      likely_responsible_department: null,
+      classification_reason: "Consumer electronics and household appliances are private property.",
+      confidence: 0.86,
+      location_required: false,
+      needs_clarification: false,
+      follow_up_questions: [],
+      required_technician_specialization: isIT ? "Computer or laptop technician" : "Washing-machine repair technician",
+      tutorial_search_query: "home appliance power troubleshooting safety checks",
+      recommended_tutorial_type: "Power and reset troubleshooting",
+      ai_model_used: "See & Solve Domain Diagnostic Engine"
+    };
+  }
+
+  // 14. Default General Diagnostic
   return {
     likely_issue: "Technical maintenance issue requiring inspection",
     affected_asset_or_service: "Equipment / fixture mentioned in description",
@@ -492,7 +660,7 @@ function runDomainDiagnosticEngine({ description, language, location, clarificat
     location_required: false,
     needs_clarification: false,
     follow_up_questions: [],
-    required_technician_specialization: "Plumber",
+    required_technician_specialization: "Qualified electrician",
     tutorial_search_query: null,
     recommended_tutorial_type: null,
     ai_model_used: "See & Solve Domain Diagnostic Engine"

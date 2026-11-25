@@ -18,20 +18,32 @@ function loadTechnicians() {
 
 // Known coordinates for major cities and towns in Andhra Pradesh
 const AP_CITY_COORDINATES = {
-  guntur: { lat: 16.3067, lng: 80.4365, district: "Guntur" },
-  vijayawada: { lat: 16.5062, lng: 80.6480, district: "NTR / Krishna" },
-  visakhapatnam: { lat: 17.6868, lng: 83.2185, district: "Visakhapatnam" },
-  vizag: { lat: 17.6868, lng: 83.2185, district: "Visakhapatnam" },
-  tirupati: { lat: 13.6288, lng: 79.4192, district: "Tirupati" },
-  kurnool: { lat: 15.8281, lng: 78.0373, district: "Kurnool" },
-  nellore: { lat: 14.4426, lng: 79.9865, district: "SPSR Nellore" },
-  rajahmundry: { lat: 17.0005, lng: 81.8040, district: "East Godavari" },
-  kakinada: { lat: 16.9891, lng: 82.2475, district: "Kakinada" },
-  eluru: { lat: 16.7107, lng: 81.0952, district: "Eluru" },
-  ongole: { lat: 15.5057, lng: 80.0499, district: "Prakasam" },
-  kadapa: { lat: 14.4673, lng: 78.8242, district: "YSR Kadapa" },
-  anantapur: { lat: 14.6819, lng: 77.6006, district: "Ananthapuramu" }
+  guntur: { lat: 16.3067, lng: 80.4365, district: "Guntur", canonical: "Guntur" },
+  vijayawada: { lat: 16.5062, lng: 80.6480, district: "NTR / Krishna", canonical: "Vijayawada" },
+  visakhapatnam: { lat: 17.6868, lng: 83.2185, district: "Visakhapatnam", canonical: "Visakhapatnam" },
+  vizag: { lat: 17.6868, lng: 83.2185, district: "Visakhapatnam", canonical: "Visakhapatnam" },
+  tirupati: { lat: 13.6288, lng: 79.4192, district: "Tirupati", canonical: "Tirupati" },
+  kurnool: { lat: 15.8281, lng: 78.0373, district: "Kurnool", canonical: "Kurnool" },
+  nellore: { lat: 14.4426, lng: 79.9865, district: "SPSR Nellore", canonical: "Nellore" },
+  rajahmundry: { lat: 17.0005, lng: 81.8040, district: "East Godavari", canonical: "Rajahmundry" },
+  kakinada: { lat: 16.9891, lng: 82.2475, district: "Kakinada", canonical: "Kakinada" },
+  eluru: { lat: 16.7107, lng: 81.0952, district: "Eluru", canonical: "Eluru" },
+  ongole: { lat: 15.5057, lng: 80.0499, district: "Prakasam", canonical: "Ongole" },
+  kadapa: { lat: 14.4673, lng: 78.8242, district: "YSR Kadapa", canonical: "Kadapa" },
+  anantapur: { lat: 14.6819, lng: 77.6006, district: "Ananthapuramu", canonical: "Anantapur" },
+  mangalagiri: { lat: 16.4307, lng: 80.5525, district: "Guntur", canonical: "Mangalagiri" },
+  tenali: { lat: 16.2428, lng: 80.6400, district: "Guntur", canonical: "Tenali" },
+  tadepalli: { lat: 16.4672, lng: 80.6010, district: "Guntur", canonical: "Tadepalli" },
+  gannavaram: { lat: 16.5416, lng: 80.8050, district: "Krishna", canonical: "Gannavaram" },
+  gajuwaka: { lat: 17.6905, lng: 83.2102, district: "Visakhapatnam", canonical: "Visakhapatnam" },
+  anakapalle: { lat: 17.6896, lng: 83.0024, district: "Anakapalli", canonical: "Anakapalle" },
+  kavali: { lat: 14.9132, lng: 79.9929, district: "SPSR Nellore", canonical: "Kavali" }
 };
+
+const AVAILABLE_AP_CITIES = [
+  'Guntur', 'Vijayawada', 'Visakhapatnam', 'Tirupati',
+  'Rajahmundry', 'Kakinada', 'Nellore', 'Kurnool'
+];
 
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -59,19 +71,19 @@ function normalizeSpecialization(input) {
   if (clean.includes('washing machine') || clean.includes('washer') || clean.includes('dryer') || clean.includes('appliance')) {
     return 'Washing-machine repair technician';
   }
-  if (clean.includes('laptop') || clean.includes('computer') || clean.includes('pc') || clean.includes('wi fi') || clean.includes('wifi') || clean.includes('network')) {
+  if (clean.includes('laptop') || clean.includes('computer') || clean.includes('pc') || clean.includes('wi fi') || clean.includes('wifi') || clean.includes('network') || clean.includes('printer') || clean.includes('mobile') || clean.includes('phone')) {
     return 'Computer or laptop technician';
   }
-  if (clean.includes('plumb') || clean.includes('drain') || clean.includes('pipe') || clean.includes('sink') || clean.includes('tap') || clean.includes('water leak')) {
+  if (clean.includes('plumb') || clean.includes('drain') || clean.includes('pipe') || clean.includes('sink') || clean.includes('tap') || clean.includes('toilet') || clean.includes('flush') || clean.includes('water leak')) {
     return 'Plumber';
   }
-  if (clean.includes('electric') || clean.includes('wiring') || clean.includes('mcb') || clean.includes('switchboard')) {
+  if (clean.includes('electric') || clean.includes('wiring') || clean.includes('mcb') || clean.includes('switch') || clean.includes('fan') || clean.includes('geyser') || clean.includes('inverter')) {
     return 'Qualified electrician';
   }
-  if (clean.includes('air condition') || clean.includes('refrigerat') || clean.includes('cooling') || /\bac\b/.test(clean)) {
+  if (clean.includes('air condition') || clean.includes('refrigerat') || clean.includes('fridge') || clean.includes('cooling') || /\bac\b/.test(clean)) {
     return 'Air conditioning and cooling';
   }
-  if (clean.includes('car') || clean.includes('auto') || clean.includes('vehicle') || clean.includes('engine') || clean.includes('bike') || clean.includes('mechanic')) {
+  if (clean.includes('car') || clean.includes('auto') || clean.includes('vehicle') || clean.includes('engine') || clean.includes('bike') || clean.includes('scooter') || clean.includes('mechanic')) {
     return 'Automotive mechanic';
   }
   return input;
@@ -99,7 +111,7 @@ function resolveUserLocation(locationStr, coords = null) {
         lat: cityData.lat,
         lng: cityData.lng,
         name: locationStr,
-        city: cityName.charAt(0).toUpperCase() + cityName.slice(1)
+        city: cityData.canonical || (cityName.charAt(0).toUpperCase() + cityName.slice(1))
       };
     }
   }
@@ -192,6 +204,23 @@ async function discoverLocalTechnicians({ specialization, location, coordinates 
   const allTechnicians = loadTechnicians();
   const searchCity = (resolvedLoc?.city || location || '').toLowerCase().trim();
 
+  // If no location or coordinates were supplied at all, prompt user politely with quick city options
+  if (!searchCity && (!resolvedLoc || !resolvedLoc.lat)) {
+    return {
+      showTechnicians: true,
+      locationMissing: true,
+      specialization: normSpec,
+      searchLocation: 'Location not specified',
+      count: 0,
+      technicians: [],
+      availableCities: AVAILABLE_AP_CITIES,
+      message: `Please select your city below or enable GPS Location to view verified "${normSpec}" contacts and addresses near you.`,
+      optionToExpand: true,
+      externalSearchUrl: externalMapsUrl,
+      externalNotice: "Or search local providers directly on Google Maps:"
+    };
+  }
+
   // 1. FILTER STRICTLY BY SPECIALIZATION
   const matchingSpec = allTechnicians.filter(t => {
     const cat = (t.category || '').toLowerCase();
@@ -215,6 +244,15 @@ async function discoverLocalTechnicians({ specialization, location, coordinates 
            tArea.includes(searchCity) ||
            tAddr.includes(searchCity);
   });
+
+  // 2b. Proximity radius fallback ONLY when exact town/locality match is 0 and coordinates exist
+  if (matchingLocal.length === 0 && resolvedLoc && resolvedLoc.lat && resolvedLoc.lng) {
+    matchingLocal = matchingSpec.filter(t => {
+      if (!t.coordinates) return false;
+      const dist = calculateDistanceKm(resolvedLoc.lat, resolvedLoc.lng, t.coordinates.lat, t.coordinates.lng);
+      return dist !== null && dist <= maxDistanceKm;
+    });
+  }
 
   // 3. Compute accurate distance if user coordinates or city center are known
   matchingLocal = matchingLocal.map(tech => {
@@ -268,6 +306,7 @@ async function discoverLocalTechnicians({ specialization, location, coordinates 
       searchLocation: locationQueryName,
       count: 0,
       technicians: [],
+      availableCities: AVAILABLE_AP_CITIES,
       message: `No verified local technicians found for "${normSpec}" in ${locationQueryName}.`,
       optionToExpand: true,
       externalSearchUrl: externalMapsUrl,
@@ -281,6 +320,7 @@ async function discoverLocalTechnicians({ specialization, location, coordinates 
     searchLocation: locationQueryName,
     count: topResults.length,
     technicians: topResults,
+    availableCities: AVAILABLE_AP_CITIES,
     externalSearchUrl: externalMapsUrl,
     message: topResults.length < 5
       ? `Found ${topResults.length} verified provider(s) in ${locationQueryName}. You may expand the search radius for more options.`

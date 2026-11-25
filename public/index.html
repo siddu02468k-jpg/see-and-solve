@@ -99,7 +99,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="/css/styles.css?v=3.12.0">
+  <link rel="stylesheet" href="/css/styles.css?v=3.13.0">
 </head>
 <body>
 
@@ -864,10 +864,15 @@
                 <span data-i18n="technicianTitle">Verified Local Technicians</span>
                 <button type="button" class="ui-info-btn" aria-label="Technician directory info" title="More information">
                   <svg class="ui-info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="4" r="0.8" fill="currentColor"/></svg>
-                  <span class="ui-info-popover" role="tooltip">Licensed and verified local electricians, plumbers, and mechanics operating across Guntur, Vijayawada, and AP districts. <span id="tech-header-subtitle">Specialization &amp; search area</span></span>
+                  <span class="ui-info-popover" role="tooltip">Licensed and verified local electricians, plumbers, and mechanics operating across Guntur, Vijayawada, and AP districts.</span>
                 </button>
               </h2>
+              <p id="tech-header-subtitle" style="font-size:0.9rem; color:var(--text-highlight); margin-top:0.35rem; font-weight:500;">Matched Trade &amp; Search Area</p>
             </div>
+          </div>
+          <div id="tech-city-switcher" class="city-chips-container" style="margin-bottom:1.25rem; display:none;">
+            <span class="chips-title">Switch Search City:</span>
+            <div id="tech-city-chips-list" class="chips-list"></div>
           </div>
           <div id="tech-notice-box" class="video-notice-box" style="display:none;"></div>
           <div id="tech-grid" class="tech-grid"></div>
@@ -1203,8 +1208,8 @@
   </button>
 
   <!-- ===================== SCRIPTS ===================== -->
-  <script src="/js/i18n-client.js?v=3.12.0"></script>
-  <script src="/js/app.js?v=3.12.0"></script>
+  <script src="/js/i18n-client.js?v=3.13.0"></script>
+  <script src="/js/app.js?v=3.13.0"></script>
 
   <!-- ===================== EMERGENCY FIRST-AID MODAL (OFFLINE READY) ===================== -->
   <div id="emergency-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="emergency-modal-title">

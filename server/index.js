@@ -776,7 +776,7 @@ async function handleRequest(req, res) {
           showClarification: false,
           showTroubleshooting: Boolean(safeTroubleshooting),
           showVideos: Boolean(tutorialVideos && tutorialVideos.eligible && ((tutorialVideos.videos && tutorialVideos.videos.length > 0) || tutorialVideos.aiTutorialVideo)),
-          showTechnicians: Boolean(technicians && technicians.showTechnicians && technicians.technicians && technicians.technicians.length > 0),
+          showTechnicians: Boolean(technicians && technicians.showTechnicians),
           showGovernment: Boolean(governmentAssistance)
         }
       });

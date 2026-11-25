@@ -1638,20 +1638,7 @@
     // 5. Verified Local Technicians (Only show when appropriate!)
     const techData = data.technicians;
     if (sections.showTechnicians && techData && techData.showTechnicians) {
-      els.techSection.style.display = 'block';
-      els.techHeaderSubtitle.textContent = `Specialization: ${techData.specialization} • Search Area: ${techData.searchLocation}`;
-
-      if (techData.count > 0 && techData.technicians && techData.technicians.length > 0) {
-        els.techNotice.style.display = 'none';
-        renderTechnicianCards(techData.technicians);
-      } else {
-        els.techGrid.innerHTML = '';
-        els.techNotice.style.display = 'block';
-        els.techNotice.innerHTML = `
-          <p><strong>Notice:</strong> ${escapeHtml(techData.message || 'No local technicians found in this area.')}</p>
-          ${techData.externalSearchUrl ? `<p style="margin-top:0.5rem;"><a href="${techData.externalSearchUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search Local Providers on Google Maps (External)</a></p>` : ''}
-        `;
-      }
+      renderTechSection(techData);
     } else {
       els.techSection.style.display = 'none';
     }
@@ -2210,8 +2197,67 @@
   }
 
   // =========================================================================
-  // RENDER TECHNICIAN CARDS
+  // RENDER TECHNICIAN SECTION & CARDS
   // =========================================================================
+  function renderTechSection(techData) {
+    els.techSection.style.display = 'block';
+    const specLabel = techData.specialization || 'Verified Technician';
+    const locLabel = techData.searchLocation || 'Andhra Pradesh';
+    if (els.techHeaderSubtitle) {
+      els.techHeaderSubtitle.textContent = `Matched Trade: ${specLabel} • Search Location: ${locLabel}`;
+    }
+
+    // Wire inline quick city switcher inside Technician card
+    const switcherBox = document.getElementById('tech-city-switcher');
+    const chipsList = document.getElementById('tech-city-chips-list');
+    const cities = techData.availableCities || ['Guntur', 'Vijayawada', 'Visakhapatnam', 'Tirupati', 'Rajahmundry', 'Kakinada', 'Nellore', 'Kurnool'];
+    if (switcherBox && chipsList) {
+      switcherBox.style.display = 'block';
+      chipsList.innerHTML = '';
+      cities.forEach(cityName => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'city-chip' + (locLabel.toLowerCase().includes(cityName.toLowerCase()) ? ' active' : '');
+        btn.textContent = cityName;
+        btn.onclick = async () => {
+          btn.disabled = true;
+          btn.textContent = `${cityName}...`;
+          try {
+            const res = await fetch('/api/technicians/search', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ specialization: specLabel, location: cityName })
+            });
+            const updated = await res.json();
+            if (updated && updated.showTechnicians) {
+              if (els.locationInput && !els.locationInput.value.trim()) {
+                els.locationInput.value = cityName;
+              }
+              renderTechSection(updated);
+            }
+          } catch (e) {
+            showToast('Unable to switch city right now.');
+            btn.disabled = false;
+            btn.textContent = cityName;
+          }
+        };
+        chipsList.appendChild(btn);
+      });
+    }
+
+    if (techData.count > 0 && techData.technicians && techData.technicians.length > 0) {
+      els.techNotice.style.display = 'none';
+      renderTechnicianCards(techData.technicians);
+    } else {
+      els.techGrid.innerHTML = '';
+      els.techNotice.style.display = 'block';
+      els.techNotice.innerHTML = `
+        <p><strong>Notice:</strong> ${escapeHtml(techData.message || 'No local technicians found in this area. Pick a nearby city above to view verified contacts.')}</p>
+        ${techData.externalSearchUrl ? `<p style="margin-top:0.65rem;"><a href="${techData.externalSearchUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search Local "${escapeHtml(specLabel)}" on Google Maps</a></p>` : ''}
+      `;
+    }
+  }
+
   function renderTechnicianCards(techs) {
     els.techGrid.innerHTML = '';
     techs.forEach(t => {
@@ -2219,8 +2265,9 @@
       card.className = 'tech-card';
 
       const distanceBadge = t.distanceKm !== null ? `<span class="tech-distance">${t.distanceKm} km away</span>` : '';
+      const areaLabel = [t.locality, t.city, t.district].filter(Boolean).join(', ');
       const phoneHtml = t.phone
-        ? `<div class="tech-phone available" style="display:flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> <span>Phone: <a href="tel:${t.phone.replace(/[^0-9+]/g, '')}">${escapeHtml(t.phone)}</a></span></div>`
+        ? `<div class="tech-phone available" style="display:flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> <span>Contact: <a href="tel:${t.phone.replace(/[^0-9+]/g, '')}" style="font-weight:700;">${escapeHtml(t.phone)}</a></span></div>`
         : `<div class="tech-phone unavailable" style="display:flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><line x1="1" y1="1" x2="23" y2="23"/></svg> <span>Phone unlisted</span></div>`;
 
       const tagsHtml = (t.specificServices || []).map(s => `<span class="tech-tag">${escapeHtml(s)}</span>`).join('');
@@ -2231,21 +2278,25 @@
             <h3 class="tech-name">${escapeHtml(t.name)}</h3>
             ${distanceBadge}
           </div>
+          <div style="font-size:0.78rem; color:var(--text-highlight); font-weight:600; margin-bottom:0.4rem;">
+            ${escapeHtml(t.category || 'Verified Specialist')}${areaLabel ? ` • ${escapeHtml(areaLabel)}` : ''}
+          </div>
           <div class="tech-address" style="display:flex; align-items:flex-start; gap:0.35rem;">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span>${escapeHtml(t.address)}</span>
           </div>
           ${phoneHtml}
+          ${t.hours ? `<div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.35rem;">🕒 ${escapeHtml(t.hours)}</div>` : ''}
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.3rem;">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="#eab308" stroke="#eab308"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>${t.rating || '4.5'} (${t.reviewCount || 20}+ reviews) • Verified AP Directory</span>
+            <span>${t.rating || '4.5'} (${t.reviewCount || 20}+ reviews) • ${escapeHtml(t.source || 'Verified AP Directory')}</span>
           </div>
           <div class="tech-tags">${tagsHtml}</div>
         </div>
         <div class="tech-actions">
-          ${t.phone ? `<a href="tel:${t.phone.replace(/[^0-9+]/g, '')}" class="btn-tech-action btn-tech-call">Call</a>` : ''}
-          <a href="${t.actions.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map">Directions</a>
-          <a href="${t.actions.mapUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map">Map</a>
+          ${t.phone ? `<a href="tel:${t.phone.replace(/[^0-9+]/g, '')}" class="btn-tech-action btn-tech-call">📞 Call Now</a>` : ''}
+          <a href="${t.actions.directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map">📍 Directions</a>
+          <a href="${t.actions.mapUrl}" target="_blank" rel="noopener noreferrer" class="btn-tech-action btn-tech-map">🗺️ Map</a>
         </div>
       `;
       els.techGrid.appendChild(card);
