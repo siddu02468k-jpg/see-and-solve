@@ -1349,7 +1349,7 @@
     if (qnavTrouble) qnavTrouble.style.display = sections.showTroubleshooting ? 'inline-flex' : 'none';
     if (qnavVideo) qnavVideo.style.display = sections.showVideos ? 'inline-flex' : 'none';
     if (qnavTech) qnavTech.style.display = sections.showTechnicians ? 'inline-flex' : 'none';
-    if (qnavGov) qnavGov.style.display = sections.showGovernmentHelp ? 'inline-flex' : 'none';
+    if (qnavGov) qnavGov.style.display = (sections.showGovernment || sections.showGovernmentHelp) ? 'inline-flex' : 'none';
 
     // Wire quick nav jump buttons with header offset awareness
     document.querySelectorAll('.qnav-btn').forEach(btn => {
@@ -1670,24 +1670,32 @@
         </h3>
         <p style="font-size:0.85rem; color:#14532d; margin-bottom:0.5rem;">${escapeHtml(auth?.description || '')}</p>
         <p style="font-size:0.85rem;"><strong>Toll-Free Helpline:</strong> ${escapeHtml(auth?.tollFree || '1902')} | <strong>Official Portal:</strong> <a href="${escapeHtml(auth?.portalUrl || 'https://meekosam.ap.gov.in')}" target="_blank" rel="noopener noreferrer">${escapeHtml(auth?.portalUrl || 'meekosam.ap.gov.in')}</a></p>
+        ${auth?.email ? `<p style="font-size:0.85rem; margin-top:0.35rem;"><strong>Official Desk Email:</strong> <a href="mailto:${escapeHtml(auth.email)}" style="color:var(--primary); font-weight:600; text-decoration:underline;">${escapeHtml(auth.email)}</a></p>` : ''}
       `;
 
       if (draft) {
         els.govSubjectInput.value = draft.subject;
         els.govBodyTextarea.value = draft.body;
 
+        const syncGovDraftLinks = () => {
+          const sub = els.govSubjectInput.value || '';
+          const bdy = els.govBodyTextarea.value || '';
+          els.btnOpenMailto.href = `mailto:${encodeURIComponent(draft.recipientEmail || '')}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(bdy)}`;
+          if (els.btnOpenWhatsapp) {
+            const waMsg = `🚨 *PUBLIC CIVIC GRIEVANCE REPORT*\n*Authority:* ${auth?.name || 'Municipal Department'}\n*Issue:* ${sub}\n*Details:* ${bdy}\n\n_Generated via See & Solve Civic Redressal Portal_`;
+            els.btnOpenWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMsg)}`;
+          }
+        };
+
+        els.govSubjectInput.oninput = syncGovDraftLinks;
+        els.govBodyTextarea.oninput = syncGovDraftLinks;
+        syncGovDraftLinks();
+
         els.btnCopyEmail.onclick = () => {
           navigator.clipboard.writeText(`Subject: ${els.govSubjectInput.value}\n\n${els.govBodyTextarea.value}`).then(() => {
             showToast('✓ Complaint email draft copied to clipboard!');
           });
         };
-
-        els.btnOpenMailto.href = `mailto:${encodeURIComponent(draft.recipientEmail || '')}?subject=${encodeURIComponent(els.govSubjectInput.value)}&body=${encodeURIComponent(els.govBodyTextarea.value)}`;
-
-        if (els.btnOpenWhatsapp) {
-          const waMsg = draft.whatsappMessage || `🚨 *PUBLIC CIVIC GRIEVANCE REPORT*\n*Authority:* ${auth?.name || 'Municipal Department'}\n*Issue:* ${els.govSubjectInput.value}\n*Details:* ${els.govBodyTextarea.value}`;
-          els.btnOpenWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMsg)}`;
-        }
 
         els.btnOpenPortal.onclick = () => {
           window.open(auth?.portalUrl || 'https://meekosam.ap.gov.in', '_blank');
@@ -2740,10 +2748,86 @@
     });
   }
 
+  // =========================================================================
+  // FLOATING STEPPER JOURNEY NAVIGATION CONTROLLER
+  // Enables Interactive Step Clicks & Scroll-Spy Tracking with Floating Sticky Header
+  // =========================================================================
+  function initStepperNavigation() {
+    const headerEl = document.querySelector('.app-header');
+
+    // 1. Wire Step Clicks to Smooth Scroll to Respective Phases
+    if (els.stepPill1) {
+      els.stepPill1.style.cursor = 'pointer';
+      els.stepPill1.setAttribute('title', 'Jump to Report Problem form');
+      els.stepPill1.addEventListener('click', () => {
+        const target = document.getElementById('report-form') || document.getElementById('tab-report');
+        if (target) {
+          const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+          const targetTop = target.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 20);
+          window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        }
+      });
+    }
+
+    if (els.stepPill2) {
+      els.stepPill2.style.cursor = 'pointer';
+      els.stepPill2.setAttribute('title', 'Jump to AI Inspection');
+      els.stepPill2.addEventListener('click', () => {
+        const target = document.getElementById('diagnose-btn') || document.getElementById('processing-state') || document.getElementById('camera-preview-container');
+        if (target) {
+          const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+          const targetTop = target.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 20);
+          window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        }
+      });
+    }
+
+    if (els.stepPill3) {
+      els.stepPill3.style.cursor = 'pointer';
+      els.stepPill3.setAttribute('title', 'Jump to Solution Hub');
+      els.stepPill3.addEventListener('click', () => {
+        const target = document.getElementById('results-container');
+        if (target && target.classList.contains('visible')) {
+          const headerHeight = headerEl ? headerEl.offsetHeight : 70;
+          const targetTop = target.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 20);
+          window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        } else {
+          showToast('Diagnostic solutions will appear here after running analysis.');
+        }
+      });
+    }
+
+    // 2. Window Scroll Listener for Floating Header & Dynamic Journey Highlighting
+    window.addEventListener('scroll', () => {
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      if (headerEl) {
+        if (scrollY > 30) {
+          headerEl.classList.add('scrolled');
+        } else {
+          headerEl.classList.remove('scrolled');
+        }
+      }
+
+      // Dynamic Step Highlighting on Scroll
+      const resContainer = document.getElementById('results-container');
+      if (resContainer && resContainer.classList.contains('visible')) {
+        const rect = resContainer.getBoundingClientRect();
+        if (rect.top <= 250) {
+          updateStepper(3);
+        } else if (scrollY > 150) {
+          updateStepper(2);
+        } else {
+          updateStepper(1);
+        }
+      }
+    }, { passive: true });
+  }
+
   // Initial Boot
   checkSession();
   updateStepper(1);
   initStepperSpotlight();
+  initStepperNavigation();
   initNavNeonLens();
   initAppRevealSplash();
   initUiInfoTooltips();
